@@ -7,6 +7,7 @@ import {Box} from "@radix-ui/themes";
 import {ThemeProvider} from "@/components/theme-provider";
 import Image from "next/image";
 import {BackgroundGradientAnimation} from "@/components/ui/background-gradient-animation";
+import "@/styles/card-animations.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
