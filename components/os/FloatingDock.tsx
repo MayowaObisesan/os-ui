@@ -6,8 +6,11 @@ import {
   IconExchange,
   IconHome,
   IconNewSection,
+  IconSettings,
   IconTerminal2,
 } from "@tabler/icons-react";
+import {DockOptions} from "@/components/Dock/DockOptions";
+import {ModeToggle} from "@/components/mode-toggle";
 
 export function OSDock() {
   const links = [
@@ -67,9 +70,30 @@ export function OSDock() {
       ),
       href: "#",
     },
+    {
+      title: "Theme",
+      icon: (
+        <ModeToggle />
+      ),
+      href: "#",
+    },
+    {
+      title: "Options",
+      icon: (
+        <DockOptions />
+      ),
+      href: "#",
+    },
+    {
+      title: "Settings",
+      icon: (
+        <IconSettings className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      ),
+      href: "#",
+    },
   ];
   return (
-    <div className="flex items-center justify-center h-[35rem] w-full">
+    <div className="flex items-center justify-center w-full">
       <FloatingDock
         mobileClassName="translate-y-20" // only for demo, remove for production
         items={links}

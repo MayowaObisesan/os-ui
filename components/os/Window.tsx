@@ -10,59 +10,194 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { SHButton } from "@/components/ui/button"
-import {OSMenu} from "@/components/os/Menu";
+import { Button } from "@/components/ui/button"
+import {DynamicOSMenu, defaultOSMenuConfig, MenuConfig} from "@/components/os/DynamicMenu";
 import {Flex, Theme} from "@radix-ui/themes";
 import {LucideMaximize2, LucideMinus, LucideX} from "lucide-react";
 import {cn} from "@/lib/utils";
-import {useState} from "react";
+import {useState, useCallback} from "react";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
-export function OSWindow(
-  {
-    menu,
-    children,
-  } : {
-    menu: React.ReactNode,
-    children: React.ReactNode,
-  }
-) {
-  const [osType, setOsType] = useState<'mac' | 'others'>('mac');
+export type WindowState = 'open' | 'minimized' | 'maximized' | 'closed';
+
+export interface OSWindowProps {
+  title?: string;
+  description?: string;
+  menuConfig?: MenuConfig[];
+  onClose?: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  children?: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  osType?: 'mac' | 'others';
+  className?: string;
+}
+
+export function OSWindow({
+  title = "Dynamic Window",
+  description = "This is a dynamic window with configurable menu and content.",
+  menuConfig = defaultOSMenuConfig,
+  onClose,
+  onMinimize,
+  onMaximize,
+  children,
+  trigger,
+  open = false,
+  onOpenChange,
+  osType = 'mac',
+  className,
+}: OSWindowProps) {
+  const [windowState, setWindowState] = useState<WindowState>(open ? 'open' : 'closed');
+  const [currentOsType, setCurrentOsType] = useState<'mac' | 'others'>(osType);
+
+  // Handle window state changes
+  const handleClose = useCallback(() => {
+    setWindowState('closed');
+    onClose?.();
+    onOpenChange?.(false);
+  }, [onClose, onOpenChange]);
+
+  const handleMinimize = useCallback(() => {
+    setWindowState('minimized');
+    onMinimize?.();
+  }, [onMinimize]);
+
+  const handleMaximize = useCallback(() => {
+    setWindowState(windowState === 'maximized' ? 'open' : 'maximized');
+    onMaximize?.();
+  }, [windowState, onMaximize]);
+
+  const handleOpen = useCallback(() => {
+    setWindowState('open');
+    onOpenChange?.(true);
+  }, [onOpenChange]);
+
+  // Toggle OS type for demonstration
+  const toggleOsType = useCallback(() => {
+    setCurrentOsType(prev => prev === 'mac' ? 'others' : 'mac');
+  }, []);
+
+  const defaultTrigger = (
+    <Button variant="outline" onClick={handleOpen}>
+      Open Window
+    </Button>
+  );
 
   return (
-    <AlertDialog>
+    <AlertDialog
+      // open={windowState !== 'closed'} onOpenChange={(open) => {
+      //   if (!open) handleClose();
+      // }}
+    >
       <AlertDialogTrigger asChild>
-        <SHButton variant="outline">Show Dialog</SHButton>
+        {trigger || defaultTrigger}
       </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
+      <AlertDialogContent className={cn("max-w-4xl", className)}>
+        <AlertDialogHeader className="p-0">
           <AlertDialogFooter className={'p-0! justify-start!'}>
-            {/*<AlertDialogAction>Continue</AlertDialogAction>*/}
             <Theme className={'w-full'}>
-              <Flex className={cn("w-full!", osType === 'others' ? 'flex-row-reverse' : 'flex-row justify-between')} gap={'2'}>
-                <Flex className={cn(osType === 'others' ? 'flex-row-reverse flex-1' : '')} align={'center'} gapX={'2'} pl={'0'}>
+              <Flex
+                className={cn(
+                  "w-full cursor-move select-none",
+                  currentOsType === 'others' ? 'flex-row-reverse' : 'flex-row justify-between'
+                )}
+                gap={'2'}
+                // onDoubleClick={toggleOsType}
+              >
+                <Flex
+                  className={cn(currentOsType === 'others' ? 'flex-row-reverse flex-1' : '')}
+                  align={'center'}
+                  gapX={'2'}
+                  pl={'0'}
+                >
                   <AlertDialogCancel className={'p-0 border-0 outline-0 ring-0! bg-transparent!'}>
-                    <SHButton className={'size-4 bg-[tomato]! text-black'} size={'icon'}>
-                      <LucideX className={'size-2.5'} size={1} strokeWidth={4} />
-                    </SHButton>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className={cn(
+                            'size-4 transition-colors',
+                            windowState === 'minimized' ? 'bg-gray-400!' : 'bg-[tomato]! text-black'
+                          )}
+                          size={'icon'}
+                          onClick={handleClose}
+                        >
+                          <LucideX className={'size-2.5'} strokeWidth={4} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>Close</span>
+                      </TooltipContent>
+                    </Tooltip>
                   </AlertDialogCancel>
-                  <SHButton className={'size-4 bg-amber-400! text-black'} size={'icon'}>
-                    <LucideMinus className={'size-2.5'} size={1} strokeWidth={4} />
-                  </SHButton>
-                  <SHButton className={'size-4 bg-green-500! text-black'} size={'icon'}>
-                    <LucideMaximize2 className={'size-2'} size={1} strokeWidth={4} />
-                  </SHButton>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className={cn(
+                          'size-4 transition-colors',
+                          windowState === 'minimized' ? 'bg-gray-400!' : 'bg-amber-400! text-black'
+                        )}
+                        size={'icon'}
+                        onClick={handleMinimize}
+                      >
+                        <LucideMinus className={'size-2.5'} strokeWidth={4} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span>Minimize</span>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className={cn(
+                          'size-4 transition-colors',
+                          windowState === 'maximized' ? 'bg-green-600!' : 'bg-green-500! text-black'
+                        )}
+                        size={'icon'}
+                        onClick={handleMaximize}
+                      >
+                        <LucideMaximize2 className={'size-2'} strokeWidth={4} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span>Maximize</span>
+                    </TooltipContent>
+                  </Tooltip>
                 </Flex>
-                <OSMenu />
+                <DynamicOSMenu menus={menuConfig} className="flex-1" />
               </Flex>
             </Theme>
           </AlertDialogFooter>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </AlertDialogDescription>
+          <div className="pb-4">
+            <AlertDialogTitle className="text-lg font-semibold">{title}</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground mt-1">
+              {description}
+            </AlertDialogDescription>
+          </div>
         </AlertDialogHeader>
+
+        {/* Window Content */}
+        <div className="px-6 pb-6">
+          {children || (
+            <div className="bg-muted/50 rounded-lg p-8 text-center border-2 border-dashed border-muted-foreground/25">
+              <p className="text-muted-foreground">
+                Dynamic window content goes here. This window supports:
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                <li>• Dynamic menu configuration</li>
+                <li>• Window state management (minimize, maximize, close)</li>
+                <li>• Custom content rendering</li>
+                <li>• OS-specific styling (double-click title bar to toggle)</li>
+                <li>• Configurable triggers and callbacks</li>
+              </ul>
+            </div>
+          )}
+        </div>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

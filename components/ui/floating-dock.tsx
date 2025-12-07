@@ -114,11 +114,13 @@ function IconContainer({
   title,
   icon,
   href,
+  onClick,
 }: {
   mouseX: MotionValue;
   title: string;
   icon: React.ReactNode;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 }) {
   let ref = useRef<HTMLDivElement>(null);
 
@@ -128,48 +130,48 @@ function IconContainer({
     return val - bounds.x - bounds.width / 2;
   });
 
-  let widthTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
-  let heightTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
+  let widthTransform = useTransform(distance, [-250, 0, 250], [40, 80, 40]);
+  let heightTransform = useTransform(distance, [-250, 0, 250], [40, 80, 40]);
 
-  let widthTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
+  let widthTransformIcon = useTransform(distance, [-250, 0, 250], [20, 40, 20]);
   let heightTransformIcon = useTransform(
     distance,
-    [-150, 0, 150],
+    [-250, 0, 250],
     [20, 40, 20],
   );
 
   let width = useSpring(widthTransform, {
     mass: 0.1,
-    stiffness: 150,
+    stiffness: 250,
     damping: 12,
   });
   let height = useSpring(heightTransform, {
     mass: 0.1,
-    stiffness: 150,
+    stiffness: 250,
     damping: 12,
   });
 
   let widthIcon = useSpring(widthTransformIcon, {
     mass: 0.1,
-    stiffness: 150,
+    stiffness: 250,
     damping: 12,
   });
   let heightIcon = useSpring(heightTransformIcon, {
     mass: 0.1,
-    stiffness: 150,
+    stiffness: 250,
     damping: 12,
   });
 
   const [hovered, setHovered] = useState(false);
 
   return (
-    <a href={href}>
+    <div onClick={() => onClick?.()}>
       <motion.div
         ref={ref}
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800"
+        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800 cursor-pointer"
       >
         <AnimatePresence>
           {hovered && (
@@ -190,6 +192,6 @@ function IconContainer({
           {icon}
         </motion.div>
       </motion.div>
-    </a>
+    </div>
   );
 }

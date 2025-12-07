@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import {Theme} from "@radix-ui/themes";
 import "./globals.css";
+import {OSDock} from "@/components/os/FloatingDock";
+import {Box} from "@radix-ui/themes";
+import {ThemeProvider} from "@/components/theme-provider";
+import Image from "next/image";
+import {BackgroundGradientAnimation} from "@/components/ui/background-gradient-animation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,13 +29,60 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`h-dvh ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Theme accentColor="green" grayColor="gray" radius="large" scaling="100%">
-          {children}
-        </Theme>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Theme accentColor="green" grayColor="gray" radius="large" scaling="100%">
+            {/*<Box className={'z-[1000]'} position={'absolute'} right={'4'}>*/}
+            {/*  <ModeToggle />*/}
+            {/*</Box>*/}
+            {/*<DottedGlowBackground*/}
+            {/*  className="pointer-events-none mask-radial-to-90% mask-radial-at-center"*/}
+            {/*  opacity={1}*/}
+            {/*  gap={10}*/}
+            {/*  radius={1.6}*/}
+            {/*  colorLightVar="--color-neutral-500"*/}
+            {/*  glowColorLightVar="--color-neutral-600"*/}
+            {/*  colorDarkVar="--color-neutral-500"*/}
+            {/*  glowColorDarkVar="--color-sky-800"*/}
+            {/*  backgroundOpacity={0}*/}
+            {/*  speedMin={0.3}*/}
+            {/*  speedMax={1.6}*/}
+            {/*  speedScale={1}*/}
+            {/*/>*/}
+            {/*<Image*/}
+            {/*  className="-z-1 fixed top-0 w-full h-full"*/}
+            {/*  src="https://images.pexels.com/photos/35040824/pexels-photo-35040824.jpeg"*/}
+            {/*  alt="Next.js logo"*/}
+            {/*  width={180}*/}
+            {/*  height={38}*/}
+            {/*  priority*/}
+            {/*/>*/}
+
+            <Box className={'-z-1'} position={'fixed'} top={'0'}>
+              <BackgroundGradientAnimation>
+                {/*<div className="absolute z-50 inset-0 flex items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
+                  <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b from-white/80 to-white/20">
+                    Gradients X Animations
+                  </p>
+                </div>*/}
+              </BackgroundGradientAnimation>
+            </Box>
+
+            {children}
+
+            <Box className={'z-[1000]'} position={'fixed'} bottom={'4'} width={'100%'}>
+              <OSDock />
+            </Box>
+          </Theme>
+        </ThemeProvider>
       </body>
     </html>
   );
