@@ -97,7 +97,7 @@ export function OSWindow({
       <AlertDialogContent className={cn(
         "transition-all duration-300 ease-in-out",
         windowState === 'maximized'
-          ? "min-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-10"
+          ? "min-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-8"
           : "max-w-4xl",
         className
       )}>
