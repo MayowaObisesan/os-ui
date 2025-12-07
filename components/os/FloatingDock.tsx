@@ -1,8 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import {
   IconBrandGithub,
-  IconBrandX,
+  IconBrandX, IconCalculator,
   IconExchange,
   IconHome,
   IconNewSection,
@@ -11,8 +13,12 @@ import {
 } from "@tabler/icons-react";
 import {DockOptions} from "@/components/Dock/DockOptions";
 import {ModeToggle} from "@/components/mode-toggle";
+import { OSWindow } from "@/components/os/Window";
+import { Calculator } from "@/components/os/Calculator";
 
 export function OSDock() {
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+
   const links = [
     {
       title: "Home",
@@ -58,9 +64,9 @@ export function OSDock() {
     {
       title: "Calculator",
       icon: (
-        <IconExchange className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      onClick: () => setCalculatorOpen(true)
     },
 
     // {
@@ -100,11 +106,13 @@ export function OSDock() {
     },
   ];
   return (
-    <div className="flex items-center justify-center w-full">
-      <FloatingDock
-        mobileClassName="translate-y-20" // only for demo, remove for production
-        items={links}
-      />
-    </div>
+    <>
+      <div className="flex items-center justify-center w-full">
+        <FloatingDock
+          mobileClassName="translate-y-20" // only for demo, remove for production
+          items={links}
+        />
+      </div>
+    </>
   );
 }

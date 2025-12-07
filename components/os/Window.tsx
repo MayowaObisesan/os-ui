@@ -87,7 +87,7 @@ export function OSWindow({
 
   return (
     <AlertDialog
-      // open={windowState !== 'closed'} onOpenChange={(open) => {
+      // open={open} onOpenChange={(open) => {
       //   if (!open) handleClose();
       // }}
     >

@@ -1,265 +1,200 @@
-# Dynamic OS Window Component
+# Draggable Window System
 
-A fully dynamic, configurable window component that mimics operating system window behavior with support for different OS styling, dynamic menus, and flexible content rendering.
+A comprehensive draggable window system built with React, dnd-kit, Zustand, and shadcn/ui components.
+
+## Overview
+
+This system replaces the previous AlertDialog-based window implementation with a new Card-based draggable window system that provides:
+
+- **Multiple Window Support**: Manage up to 5 windows simultaneously
+- **Drag & Drop Functionality**: Full drag-and-drop positioning using dnd-kit
+- **Window State Management**: Minimize, maximize, close, and restore windows
+- **Window Layering**: Proper z-index management and focus handling
+- **State Persistence**: Window states are persisted using Zustand with localStorage
+- **OS-Specific Styling**: Support for both macOS and Windows styling
+- **Dynamic Menu Integration**: Full integration with DynamicOSMenu component
+
+## Architecture
+
+```
+├── stores/
+│   └── windowStore.ts          # Zustand store for window state management
+├── components/
+│   └── os/
+│       ├── DraggableWindow.tsx # New Card-based draggable window
+│       ├── WindowsManager.tsx  # Manager component for multiple windows
+│       └── DraggableWindowDemo.tsx # Demo component showcasing functionality
+```
+
+## Key Components
+
+### 1. WindowStore (Zustand)
+Centralized state management for all windows with features:
+- Window CRUD operations
+- State persistence
+- Window limits (max 5)
+- Z-index management
+- Focus handling
+
+### 2. DraggableWindow
+Card-based window component that:
+- Replaces AlertDialog with Card component
+- Integrates dnd-kit for drag functionality
+- Preserves all existing styling and functionality
+- Provides visual feedback during dragging
+
+### 3. WindowsManager
+Manages the overall window system:
+- Coordinates multiple windows
+- Handles window layering
+- Provides taskbar for minimized windows
+- Manages window focus and active states
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { WindowSystem, useWindowFactory } from "@/components/os/WindowsManager";
+
+function MyApp() {
+  const { createWindow } = useWindowFactory();
+
+  const handleOpenWindow = () => {
+    createWindow({
+      title: "My Window",
+      description: "A draggable window",
+      content: <div>Window content here</div>,
+      osType: 'mac',
+      position: { x: 100, y: 100 },
+      size: { width: 500, height: 400 }
+    });
+  };
+
+  return (
+    <WindowSystem>
+      <button onClick={handleOpenWindow}>Open Window</button>
+    </WindowSystem>
+  );
+}
+```
+
+### Window Configuration
+
+```tsx
+interface WindowConfig {
+  title: string;              // Window title
+  description?: string;       // Window description
+  content?: React.ReactNode;  // Window content
+  menuConfig?: any[];         // Custom menu configuration
+  osType?: 'mac' | 'others';  // OS styling type
+  position?: { x: number; y: number }; // Initial position
+  size?: { width: number; height: number }; // Initial size
+  defaultState?: 'open' | 'minimized' | 'maximized'; // Initial state
+}
+```
 
 ## Features
 
-- **Window State Management**: Full support for minimize, maximize, close, and open states
-- **Dynamic Menu System**: Integrated with the `DynamicMenu` system for flexible menu configuration
-- **OS-Specific Styling**: Support for both Mac and Windows/other OS styling patterns
-- **Custom Content**: Accepts any React content as children
-- **Controlled & Uncontrolled**: Can be controlled by parent state or work independently
-- **Event Callbacks**: Comprehensive callback system for window state changes
-- **Responsive Design**: Adapts to different screen sizes
-
-## Basic Usage
-
-### Simple Window
-
-```tsx
-import { OSWindow } from "@/components/os/Window";
-
-export default function Example() {
-  return (
-    <OSWindow 
-      title="My Application"
-      description="This is a simple window"
-    />
-  );
-}
-```
-
-### Custom Menu Configuration
-
-```tsx
-import { OSWindow, MenuConfig } from "@/components/os/Window";
-
-const customMenu: MenuConfig[] = [
-  {
-    label: 'File',
-    content: [
-      { type: 'item', label: 'New', shortcut: { keys: '⌘N' } },
-      { type: 'item', label: 'Open...', shortcut: { keys: '⌘O' } },
-      { type: 'separator' },
-      { type: 'item', label: 'Save', shortcut: { keys: '⌘S' } },
-    ]
-  },
-  {
-    label: 'Edit',
-    content: [
-      { type: 'item', label: 'Undo', shortcut: { keys: '⌘Z' } },
-      { type: 'item', label: 'Redo', shortcut: { keys: '⇧⌘Z' } },
-      { type: 'separator' },
-      { type: 'checkbox', label: 'Auto-save', checked: true },
-    ]
-  }
-];
-
-export default function CustomMenuExample() {
-  return (
-    <OSWindow 
-      title="Custom Application"
-      description="Window with custom menu"
-      menuConfig={customMenu}
-    />
-  );
-}
-```
-
-### Custom Content
-
-```tsx
-export default function CustomContentExample() {
-  return (
-    <OSWindow 
-      title="Rich Content Window"
-      description="Window with custom content"
-    >
-      <div className="space-y-4">
-        <div className="bg-blue-50 p-4 rounded-lg border">
-          <h3 className="font-semibold text-blue-900">Custom Content</h3>
-          <p className="text-blue-700 mt-2">
-            This content is completely customizable.
-          </p>
-        </div>
-        {/* Any React content here */}
-      </div>
-    </OSWindow>
-  );
-}
-```
-
-### Controlled Window
-
-```tsx
-import { useState } from "react";
-
-export default function ControlledExample() {
-  const [windowOpen, setWindowOpen] = useState(false);
-
-  return (
-    <div>
-      <button onClick={() => setWindowOpen(true)}>
-        Open Window
-      </button>
-      
-      <OSWindow 
-        title="Controlled Window"
-        description="This window is controlled by parent state"
-        open={windowOpen}
-        onOpenChange={setWindowOpen}
-        onClose={() => console.log('Window closed')}
-        onMinimize={() => console.log('Window minimized')}
-        onMaximize={() => console.log('Window maximized')}
-      >
-        <div className="text-center py-8">
-          <p>🎉 Hello from controlled window!</p>
-        </div>
-      </OSWindow>
-    </div>
-  );
-}
-```
-
-### Custom Trigger
-
-```tsx
-import { Button } from "@/components/ui/button";
-
-export default function CustomTriggerExample() {
-  return (
-    <OSWindow 
-      title="Custom Trigger"
-      trigger={
-        <Button variant="outline" size="lg">
-          Open My Window
-        </Button>
-      }
-    >
-      <p>This window uses a custom trigger button.</p>
-    </OSWindow>
-  );
-}
-```
-
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `"Dynamic Window"` | Window title displayed in the title bar |
-| `description` | `string` | `"This is a dynamic window..."` | Description shown below the title |
-| `menuConfig` | `MenuConfig[]` | `defaultOSMenuConfig` | Dynamic menu configuration |
-| `onClose` | `() => void` | `undefined` | Callback when window is closed |
-| `onMinimize` | `() => void` | `undefined` | Callback when window is minimized |
-| `onMaximize` | `() => void` | `undefined` | Callback when window is maximized |
-| `children` | `React.ReactNode` | `undefined` | Custom window content |
-| `trigger` | `React.ReactNode` | `undefined` | Custom trigger element |
-| `open` | `boolean` | `false` | Controlled open state |
-| `onOpenChange` | `(open: boolean) => void` | `undefined` | Callback for open state changes |
-| `osType` | `'mac' \| 'others'` | `'mac'` | OS styling type (Mac vs Windows) |
-| `className` | `string` | `undefined` | Additional CSS classes |
-
-## Window States
-
-The component supports the following window states:
-
-- **`open`**: Window is visible and active
-- **`minimized`**: Window is minimized (visual feedback in controls)
-- **`maximized`**: Window is maximized (visual feedback in controls)
-- **`closed`**: Window is closed/hidden
-
-## Interactive Features
-
 ### Window Controls
+- **Close**: Removes the window from the system
+- **Minimize**: Hides the window and adds it to the taskbar
+- **Maximize**: Expands window to fill available space
+- **Restore**: Returns maximized window to normal size
 
-- **Close Button**: Closes the window (triggers `onClose` callback)
-- **Minimize Button**: Minimizes the window (triggers `onMinimize` callback)
-- **Maximize Button**: Toggles maximize state (triggers `onMaximize` callback)
+### Drag Functionality
+- Drag windows by their title bars
+- Visual feedback during dragging (shadows, opacity changes)
+- Smooth positioning with dnd-kit
+- Constraints to keep windows within viewport
 
-### OS Styling Toggle
+### Window Management
+- Automatic window focusing when clicked
+- Proper z-index layering (newer windows appear on top)
+- Taskbar for accessing minimized windows
+- Window state persistence across sessions
 
-Double-click on the title bar to toggle between Mac and Windows/other OS styling patterns. This is useful for testing and demonstration purposes.
+### OS Styling
+- **macOS Style**: Window controls on the left, rounded corners
+- **Windows Style**: Window controls on the right, square corners
+- Maintains all existing styling from the original OSWindow component
 
-### Dynamic Menu System
+## State Persistence
 
-The window integrates with the `DynamicMenu` system, allowing for:
+The window system uses Zustand's persist middleware to save:
+- Window positions and sizes
+- Window states (open, minimized, maximized)
+- Window content and configuration
+- Z-index ordering
 
-- Configurable menu items with shortcuts
-- Checkbox and radio button menu items
-- Submenu support
-- Custom event handlers for menu actions
+Session data is automatically restored when the application reloads.
 
-## Menu Configuration
+## Window Limits
 
-See the [DynamicMenu Documentation](../DynamicMenu/README.md) for detailed information about menu configuration options.
+The system enforces a maximum of 5 open windows simultaneously. Users will see:
+- Warning messages when attempting to exceed the limit
+- Disabled window creation buttons when limit is reached
+- Visual indicators in the window manager controls
 
-## Customization
+## Demo
 
-### Styling
+Visit `/` to see the interactive demo featuring:
+- Multiple sample windows
+- Drag and drop functionality
+- Window state management
+- OS styling comparisons
+- Window limits demonstration
 
-The component uses Radix UI Themes and Tailwind CSS for styling. You can customize the appearance by:
+## Migration from OSWindow
 
-1. Modifying the component's `className` prop
-2. Using the Theme provider for global styling
-3. Extending the CSS with custom classes
-
-### Custom Window Controls
-
-You can implement custom window control behavior by providing your own callback functions:
+The new system maintains full compatibility with the existing OSWindow API while providing enhanced functionality:
 
 ```tsx
-<OSWindow 
-  onClose={() => {
-    // Custom close logic
-    setWindowVisible(false);
-    // Additional cleanup
-  }}
-  onMinimize={() => {
-    // Custom minimize logic
-    setWindowState('minimized');
-  }}
-  onMaximize={() => {
-    // Custom maximize logic
-    toggleFullscreen();
-  }}
-/>
+// Old usage
+<OSWindow
+  title="My Window"
+  description="Description"
+  open={windowOpen}
+  onOpenChange={setWindowOpen}
+>
+  Content here
+</OSWindow>
+
+// New usage with enhanced features
+const { createWindow } = useWindowFactory();
+const windowId = createWindow({
+  title: "My Window",
+  description: "Description",
+  content: <div>Content here</div>
+});
 ```
 
-## Examples
+## Technical Details
 
-See the main demo page (`app/page.tsx`) for comprehensive examples of all features:
+### Dependencies
+- `@dnd-kit/core`: Drag and drop functionality
+- `@dnd-kit/sortable`: Advanced drag features
+- `@dnd-kit/utilities`: Utility functions for dnd-kit
+- `zustand`: State management with persistence
+- `shadcn/ui`: Card components and styling
 
-- Basic window usage
-- Custom menu configuration
-- Custom content rendering
-- Controlled window state
-- Multiple windows with different OS styles
+### Performance
+- Efficient window rendering (only open windows are rendered)
+- Optimized drag operations with dnd-kit
+- Minimal re-renders with Zustand's selective subscriptions
+- Smooth animations and transitions
 
-## Integration
+### Browser Support
+- Modern browsers with drag-and-drop API support
+- Mobile touch support through dnd-kit
+- Responsive design for various screen sizes
 
-This component is designed to work seamlessly with:
+## Future Enhancements
 
-- Next.js 15+ with App Router
-- React 19+
-- Radix UI components
-- Tailwind CSS
-- TypeScript
-
-## TypeScript Support
-
-The component is fully typed with TypeScript, providing:
-
-- Comprehensive prop interfaces
-- Type-safe menu configuration
-- Proper state management types
-- Event callback typing
-
-## Accessibility
-
-The component follows accessibility best practices:
-
-- Keyboard navigation support
-- Screen reader compatibility
-- ARIA labels and roles
-- Focus management
-- High contrast support
+Potential improvements for future versions:
+- Snap-to-grid functionality
+- Window resizing handles
+- Virtual desktops support
+- Window grouping and tabbing
+- Custom window themes
+- Keyboard shortcuts for window management
