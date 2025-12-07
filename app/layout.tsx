@@ -78,7 +78,7 @@ export default function RootLayout({
 
             {children}
 
-            <Box className={'z-[1000]'} position={'fixed'} bottom={'4'} width={'100%'}>
+            <Box className={'z-[1000]!'} position={'fixed'} bottom={'4'} width={'100%'}>
               <OSDock />
             </Box>
           </Theme>

@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import {DynamicOSMenu, defaultOSMenuConfig, MenuConfig} from "@/components/os/DynamicMenu";
 import {Flex, Theme} from "@radix-ui/themes";
-import {LucideMaximize2, LucideMinus, LucideX} from "lucide-react";
+import {LucideMaximize2, LucideMinimize2, LucideMinus, LucideX} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {useState, useCallback} from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
@@ -54,7 +54,7 @@ export function OSWindow({
 
   // Handle window state changes
   const handleClose = useCallback(() => {
-    setWindowState('closed');
+    // setWindowState('closed');
     onClose?.();
     onOpenChange?.(false);
   }, [onClose, onOpenChange]);
@@ -94,7 +94,13 @@ export function OSWindow({
       <AlertDialogTrigger asChild>
         {trigger || defaultTrigger}
       </AlertDialogTrigger>
-      <AlertDialogContent className={cn("max-w-4xl", className)}>
+      <AlertDialogContent className={cn(
+        "transition-all duration-300 ease-in-out",
+        windowState === 'maximized'
+          ? "min-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-10 max-w-none"
+          : "max-w-4xl",
+        className
+      )}>
         <AlertDialogHeader className="p-0">
           <AlertDialogFooter className={'p-0! justify-start!'}>
             <Theme className={'w-full'}>
@@ -160,11 +166,14 @@ export function OSWindow({
                         size={'icon'}
                         onClick={handleMaximize}
                       >
-                        <LucideMaximize2 className={'size-2'} strokeWidth={4} />
+                        {windowState === 'maximized'
+                          ? <LucideMinimize2 className={'size-2'} strokeWidth={4} />
+                          : <LucideMaximize2 className={'size-2'} strokeWidth={4} />
+                        }
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <span>Maximize</span>
+                      <span>{windowState === 'maximized' ? 'Restore' : 'Maximize'}</span>
                     </TooltipContent>
                   </Tooltip>
                 </Flex>
