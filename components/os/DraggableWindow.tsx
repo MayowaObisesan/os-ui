@@ -15,9 +15,10 @@ import {DynamicOSMenu, defaultOSMenuConfig, MenuConfig} from "@/components/os/Dy
 import {Flex, Theme} from "@radix-ui/themes";
 import {LucideMaximize2, LucideMinimize2, LucideMinus, LucideX} from "lucide-react";
 import {cn} from "@/lib/utils";
-import {useState, useCallback} from "react";
+import {useState, useCallback, useRef, useEffect} from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import Draggable from 'react-draggable';
 
 export type WindowState = 'open' | 'minimized' | 'maximized' | 'closed';
 
@@ -52,6 +53,9 @@ export function OSDraggableWindow({
 }: OSWindowProps) {
   const [windowState, setWindowState] = useState<WindowState>(open ? 'open' : 'closed');
   const [currentOsType, setCurrentOsType] = useState<'mac' | 'others'>(osType);
+  const [position, setPosition] = useState({x: 0, y: 0});
+  const [bounds, setBounds] = useState({left: 0, top: 0, right: 0, bottom: 0});
+  const draggableRef = useRef<HTMLDivElement>(null);
 
   // Handle window state changes
   const handleClose = useCallback(() => {
@@ -80,6 +84,33 @@ export function OSDraggableWindow({
     setCurrentOsType(prev => prev === 'mac' ? 'others' : 'mac');
   }, []);
 
+  // Update bounds when window state changes or on resize
+  useEffect(() => {
+    const updateBounds = () => {
+      if (typeof window !== 'undefined') {
+        const padding = 20;
+        setBounds({
+          left: -window.innerWidth / 2 + padding,
+          top: -window.innerHeight / 2 + padding,
+          right: window.innerWidth / 2 - padding,
+          bottom: window.innerHeight / 2 - padding
+        });
+      }
+    };
+
+    updateBounds();
+    window.addEventListener('resize', updateBounds);
+    return () => window.removeEventListener('resize', updateBounds);
+  }, []);
+
+  const handleDrag = useCallback((e: any, data: {x: number, y: number}) => {
+    setPosition({x: data.x, y: data.y});
+  }, []);
+
+  const handleStop = useCallback((e: any, data: {x: number, y: number}) => {
+    setPosition({x: data.x, y: data.y});
+  }, []);
+
   const defaultTrigger = (
     <Button variant="outline" onClick={handleOpen}>
       Open Window
@@ -94,21 +125,31 @@ export function OSDraggableWindow({
 
       <Flex
         align={'center'}
-        className={'h-dvh w-full'}
+        className={'bg-orange-400'}
         justify={'center'}
       >
-        <Card className={cn(
-          'p-4 pt-2 w-2xl max-w-4xl h-auto',
-          windowState === 'closed' ? 'card-animate--exit' : 'card-animate',
-          "transition-all duration-800 ease-in-out",
-          windowState === 'maximized' && "w-[calc(100vw-4rem)] max-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-8",
-          className
-        )}>
+        <Draggable
+          handle=".window-drag-handle"
+          bounds={"body"}
+          position={position}
+          onDrag={handleDrag}
+          onStop={handleStop}
+          disabled={windowState === 'closed' || windowState === 'minimized'}
+          nodeRef={draggableRef}
+        >
+          <div ref={draggableRef}>
+            <Card className={cn(
+              'absolute p-4 pt-2 w-2xl max-w-4xl h-auto',
+              windowState === 'closed' ? 'card-animate--exit' : 'card-animate',
+              "transition-all duration-800 ease-in-out",
+              windowState === 'maximized' && "w-[calc(100vw-4rem)] max-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-8",
+              className
+            )}>
           <CardFooter className={'p-0'}>
             <Theme className={'w-full'}>
               <Flex
                 className={cn(
-                  "w-full cursor-move select-none",
+                  "w-full cursor-move select-none window-drag-handle",
                   currentOsType === 'others' ? 'flex-row-reverse' : 'flex-row justify-between'
                 )}
                 gap={'2'}
@@ -193,6 +234,8 @@ export function OSDraggableWindow({
             {children}
           </CardContent>
         </Card>
+          </div>
+        </Draggable>
       </Flex>
     </>
   );

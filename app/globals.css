@@ -121,3 +121,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+body {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}
