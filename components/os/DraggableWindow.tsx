@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {DynamicOSMenu, defaultOSMenuConfig, MenuConfig} from "@/components/os/DynamicMenu";
 import {Flex, Theme} from "@radix-ui/themes";
@@ -17,7 +7,7 @@ import {LucideMaximize2, LucideMinimize2, LucideMinus, LucideX} from "lucide-rea
 import {cn} from "@/lib/utils";
 import {useState, useCallback, useRef, useEffect} from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import Draggable from 'react-draggable';
 
 export type WindowState = 'open' | 'minimized' | 'maximized' | 'closed';

@@ -3,10 +3,16 @@
 import {OSWindow} from "@/components/os/Window";
 import {OSDraggableWindow} from "@/components/os/DraggableWindow";
 import {Calculator} from "@/components/os/Calculator";
+import StoreDemo from "@/app/store-demo";
+import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
+import {WindowTracker} from "@/components/os/WindowTracker";
+import {IconCalculator} from "@tabler/icons-react";
+import {Button} from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <WindowTracker />
       <OSWindow
         title="My Window"
         description="Description"
@@ -27,6 +33,34 @@ export default function Home() {
       >
         <Calculator />
       </OSDraggableWindow>
+
+      <StoreDraggableWindow
+        title="Demo Draggable Window"
+        description="A draggable store-managed window"
+        type="draggable"
+        defaultPosition={{ x: 0, y: 100 }}
+      >
+        <div className="space-y-2">
+          <p>This is a draggable window managed by the store.</p>
+          <ul className="list-disc ml-4">
+            <li>Position is tracked</li>
+            <li>State is centralized</li>
+            <li>Z-index is managed</li>
+          </ul>
+        </div>
+      </StoreDraggableWindow>
+
+      <StoreDraggableWindow
+        title="Calculator Window"
+        description="A draggable store-managed calculator window"
+        type="draggable"
+        defaultPosition={{ x: 0, y: 100 }}
+        trigger={<Button><IconCalculator /></Button>}
+      >
+        <Calculator />
+      </StoreDraggableWindow>
+
+      {/*<StoreDemo />*/}
     </div>
   );
 }
