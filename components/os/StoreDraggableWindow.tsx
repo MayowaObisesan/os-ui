@@ -85,6 +85,7 @@ const WindowContent = memo(function WindowContent({
         nodeRef={draggableRef}
       >
         <div
+          className={'absolute rounded-md shadow-lg drop-shadow-black delay-800 transition-colors duration-800 ease-in-out'}
           ref={draggableRef}
           style={{ zIndex: window?.zIndex || 100, position: "absolute" }}
         >
