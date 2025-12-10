@@ -6,12 +6,13 @@ import {Calculator} from "@/components/os/Calculator";
 import StoreDemo from "@/app/store-demo";
 import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
 import {WindowTracker} from "@/components/os/WindowTracker";
-import {IconCalculator, IconFileTextFilled, IconGlobe} from "@tabler/icons-react";
+import {IconCalculator, IconFileTextFilled, IconFileTextSpark, IconGlobe} from "@tabler/icons-react";
 import {Button} from "@/components/ui/button";
 import {MenuRegistryProvider} from "@/components/os/MenuRegistryContext";
 import {MenuRegistryDemo} from "@/components/os/MenuRegistryDemo";
 import {TextEditor} from "@/components/os/TextEditor";
 import HomeOld from "@/app/page-old";
+import {NoteEditor} from "@/components/os/DynamicNoteEditor";
 
 export default function Home() {
   return (
@@ -72,6 +73,16 @@ export default function Home() {
         trigger={<Button><IconFileTextFilled /></Button>}
       >
         <TextEditor />
+      </StoreDraggableWindow>
+
+      <StoreDraggableWindow
+        title="Note Editor Window"
+        description="A draggable store-managed Note Editor window - An Advanced Note Editor that feels like using Notion"
+        type="draggable"
+        defaultPosition={{ x: 20, y: 100 }}
+        trigger={<Button><IconFileTextSpark /></Button>}
+      >
+        <NoteEditor />
       </StoreDraggableWindow>
 
       <StoreDraggableWindow
