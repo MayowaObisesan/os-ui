@@ -15,7 +15,7 @@ import {cn} from "@/lib/utils";
 // Our <Editor> component with integrated menu system - PHASE 2 Enhanced (Fixed)
 export default function Editor() {
   // Creates a new editor instance.
-  const editor = useCreateBlockNote();
+  const editor: BlockNoteEditor = useCreateBlockNote();
   const [isModified, setIsModified] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
