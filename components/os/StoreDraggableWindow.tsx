@@ -89,7 +89,6 @@ const WindowContent = memo(function WindowContent({
           style={{ zIndex: window?.zIndex || 100, position: "absolute" }}
         >
           <Card
-            id={window?.id}
             className={cn(
               "p-4 pt-2 w-2xl max-w-4xl h-auto max-h-[calc(100vh-8rem)] gap-1",
               windowState === "closed" ? "card-animate--exit" : "card-animate",
@@ -372,7 +371,6 @@ export function StoreDraggableWindow({
         position: defaultPosition,
       });
       setCreatedWindowId(newWindowId);
-      console.log("Created new draggable window with ID:", newWindowId);
     } else {
       // If we have a createdWindowId, update the existing window
       updateWindow(createdWindowId, { state: "open" });
