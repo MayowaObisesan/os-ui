@@ -10,11 +10,13 @@ import {
   IconNewSection,
   IconSettings,
   IconTerminal2,
+  IconLockOff
 } from "@tabler/icons-react";
 import {DockOptions} from "@/components/Dock/DockOptions";
 import {ModeToggle} from "@/components/mode-toggle";
 import { OSWindow } from "@/components/os/Window";
 import { Calculator } from "@/components/os/Calculator";
+import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
 
 export function OSDock() {
   const [calculatorOpen, setCalculatorOpen] = useState(false);
@@ -113,6 +115,17 @@ export function OSDock() {
           items={links}
         />
       </div>
+      <StoreDraggableWindow
+        title="Calculator Window"
+        description="A draggable store-managed calculator window"
+        type="draggable"
+        defaultPosition={{ x: 0, y: 100 }}
+        trigger={<div></div>}
+        open={calculatorOpen}
+        onClose={() => setCalculatorOpen(false)}
+      >
+        <Calculator />
+      </StoreDraggableWindow>
     </>
   );
 }
