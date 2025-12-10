@@ -85,7 +85,8 @@ function TextEditor() {
     registerMenu('text-editor-menu', editorMenu, {
       componentName: 'TextEditor',
       priority: 'normal',
-      mergeStrategy: 'append'
+      mergeStrategy: 'append',
+      exclusive: true,
     });
 
     return () => {
@@ -151,7 +152,8 @@ function SettingsPanel() {
     registerMenu('settings-panel-menu', settingsMenu, {
       componentName: 'SettingsPanel',
       priority: 'low',
-      mergeStrategy: 'append'
+      mergeStrategy: 'append',
+      exclusive: true,
     });
   }, [registerMenu]);
 
@@ -192,7 +194,7 @@ export function MenuRegistryDemo() {
             Menu Registry System Demo
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            This demo showcases the dynamic menu registration system where multiple components 
+            This demo showcases the dynamic menu registration system where multiple components
             can contribute their own menus that get merged into a single, functional menu bar.
           </p>
           <div className="flex justify-center gap-4">
@@ -269,15 +271,15 @@ export function MenuRegistryDemo() {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
                 <TabsTrigger value="info">Info</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="editor" className="mt-4">
                 <TextEditor />
               </TabsContent>
-              
+
               <TabsContent value="settings" className="mt-4">
                 <SettingsPanel />
               </TabsContent>
-              
+
               <TabsContent value="info" className="mt-4">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">How It Works</h3>
