@@ -285,10 +285,12 @@ export function Calculator({ onMenuConfig }: CalculatorProps = {}) {
       }
     ];
 
+    // Register with exclusive flag to take full control of the menu
     registerMenu('calculator-menu', calculatorMenu, {
       componentName: 'Calculator',
       priority: 'high',
-      mergeStrategy: 'append'
+      mergeStrategy: 'append',
+      exclusive: true // New: This menu will be exclusive
     });
 
     return () => {

@@ -10,6 +10,7 @@ export interface RegisteredMenuConfig extends MenuConfig {
   priority: 'high' | 'normal' | 'low';
   mergeStrategy: 'append' | 'prepend' | 'replace';
   timestamp: number;
+  exclusive?: boolean; // New: indicates this menu should be exclusive
 }
 
 // Menu registry context type
@@ -19,6 +20,7 @@ export interface MenuRegistryContextType {
     componentName?: string;
     priority?: 'high' | 'normal' | 'low';
     mergeStrategy?: 'append' | 'prepend' | 'replace';
+    exclusive?: boolean; // New: exclusive menu control
   }) => void;
 
   unregisterMenu: (id: string) => void;
@@ -89,11 +91,17 @@ export function MenuRegistryProvider({
       componentName?: string;
       priority?: 'high' | 'normal' | 'low';
       mergeStrategy?: 'append' | 'prepend' | 'replace';
+      exclusive?: boolean;
     } = {}
   ) => {
     if (!isMenuRegistryEnabled) return;
 
-    const { componentName = 'Unknown', priority = 'normal', mergeStrategy = 'append' } = options;
+    const {
+      componentName = 'Unknown',
+      priority = 'normal',
+      mergeStrategy = 'append',
+      exclusive = false // Default to non-exclusive
+    } = options;
 
     const registeredConfig: RegisteredMenuConfig = {
       id,
@@ -101,6 +109,7 @@ export function MenuRegistryProvider({
       priority,
       mergeStrategy,
       timestamp: Date.now(),
+      exclusive,
       ...config[0], // Spread the first menu config
     };
 
@@ -158,8 +167,79 @@ export function MenuRegistryProvider({
       return overrideConfig || defaultMenuConfig;
     }
 
-    // Start with override config (highest priority)
-    const mergedConfig: MenuConfig[] = overrideConfig ? [...overrideConfig] : [...defaultMenuConfig];
+    // Check if any component has registered an exclusive menu
+    const hasExclusiveMenus = registeredMenus.some(menu => menu.exclusive);
+
+    // If no menus are registered, return the default
+    if (registeredMenus.length === 0) {
+      return overrideConfig || defaultMenuConfig;
+    }
+
+    // If there are exclusive menus, only show registered menus (no default merge)
+    if (hasExclusiveMenus) {
+      const mergedConfig: MenuConfig[] = [];
+
+      // Group menus by label for intelligent merging
+      const menuGroups = new Map<string, RegisteredMenuConfig[]>();
+
+      registeredMenus.forEach(menu => {
+        const existing = menuGroups.get(menu.label) || [];
+        menuGroups.set(menu.label, [...existing, menu]);
+      });
+
+      // Merge menus with the same label
+      menuGroups.forEach((menusWithSameLabel, label) => {
+        if (menusWithSameLabel.length === 1) {
+          // Single menu with this label, add it
+          const { id, componentName, priority, mergeStrategy, timestamp, exclusive, ...menuConfig } = menusWithSameLabel[0];
+          mergedConfig.push(menuConfig);
+        } else {
+          // Multiple menus with same label, merge their content
+          const allContent: MenuContentItem[] = [];
+
+          menusWithSameLabel.forEach(menu => {
+            const { content, mergeStrategy } = menu;
+
+            switch (mergeStrategy) {
+              case 'prepend':
+                allContent.unshift(...content);
+                break;
+              case 'replace':
+                // Replace existing content, but keep first occurrence
+                if (allContent.length === 0) {
+                  allContent.push(...content);
+                }
+                break;
+              case 'append':
+              default:
+                allContent.push(...content);
+                break;
+            }
+          });
+
+          // Remove duplicate separators
+          const filteredContent = allContent.filter((item, index, arr) => {
+            if (item.type === 'separator') {
+              // Keep separator only if next item is not a separator
+              return index === 0 || arr[index + 1]?.type !== 'separator';
+            }
+            return true;
+          });
+
+          const mergedMenu: MenuConfig = {
+            label,
+            content: filteredContent
+          };
+
+          mergedConfig.push(mergedMenu);
+        }
+      });
+
+      return mergedConfig;
+    }
+
+    // If no exclusive menus, merge with default (original behavior)
+    let mergedConfig: MenuConfig[] = overrideConfig ? [...overrideConfig] : [...defaultMenuConfig];
 
     // Group menus by label for intelligent merging
     const menuGroups = new Map<string, RegisteredMenuConfig[]>();
@@ -173,7 +253,7 @@ export function MenuRegistryProvider({
     menuGroups.forEach((menusWithSameLabel, label) => {
       if (menusWithSameLabel.length === 1) {
         // Single menu with this label, add it
-        const { id, componentName, priority, mergeStrategy, timestamp, ...menuConfig } = menusWithSameLabel[0];
+        const { id, componentName, priority, mergeStrategy, timestamp, exclusive, ...menuConfig } = menusWithSameLabel[0];
         mergedConfig.push(menuConfig);
       } else {
         // Multiple menus with same label, merge their content
@@ -264,9 +344,10 @@ export function withMenuRegistration<P extends object>(
     menuId?: string;
     priority?: 'high' | 'normal' | 'low';
     mergeStrategy?: 'append' | 'prepend' | 'replace';
+    exclusive?: boolean; // New: exclusive menu control
   } = {}
 ) {
-  const { menuId, priority = 'normal', mergeStrategy = 'append' } = options;
+  const { menuId, priority = 'normal', mergeStrategy = 'append', exclusive = false } = options;
 
   function MenuRegisteredComponent(props: P) {
     const { registerMenu, unregisterMenu } = useMenuRegistry();
@@ -280,12 +361,13 @@ export function withMenuRegistration<P extends object>(
         componentName,
         priority,
         mergeStrategy,
+        exclusive,
       });
 
       return () => {
         unregisterMenu(id);
       };
-    }, [props, registerMenu, unregisterMenu]);
+    }, [props, registerMenu, unregisterMenu, componentName, menuId, priority, mergeStrategy, exclusive]);
 
     return <WrappedComponent {...props} />;
   }
