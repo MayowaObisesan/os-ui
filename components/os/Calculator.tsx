@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, createContext, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MenuConfig } from "@/components/os/DynamicMenu";
 
 type Operation = '+' | '-' | '×' | '÷' | null;
 
-interface CalculatorState {
+export interface CalculatorState {
   display: string;
   previousValue: number | null;
   operation: Operation;
@@ -22,7 +23,11 @@ const initialState: CalculatorState = {
   memory: 0,
 };
 
-export function Calculator() {
+export interface CalculatorProps {
+  onMenuConfig?: (config: MenuConfig[]) => void;
+}
+
+export function Calculator({ onMenuConfig }: CalculatorProps = {}) {
   const [state, setState] = useState<CalculatorState>(initialState);
 
   const inputNumber = useCallback((num: string) => {
@@ -218,7 +223,7 @@ export function Calculator() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+    <div className="w-full mx-auto p-4 rounded-lg">
       {/* Display */}
       <div className="mb-4 p-4 bg-black text-white text-right text-2xl font-mono rounded min-h-[60px] flex items-center justify-end overflow-hidden">
         <span className="truncate">{formatDisplay(state.display)}</span>
