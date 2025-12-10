@@ -87,7 +87,7 @@ const WindowContent = memo(function WindowContent({
         <div ref={draggableRef}>
           <Card
             className={cn(
-              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto",
+              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto gap-1",
               windowState === "closed" ? "card-animate--exit" : "card-animate",
               "transition-all duration-800 ease-in-out",
               windowState === "maximized" &&
@@ -177,7 +177,7 @@ const WindowContent = memo(function WindowContent({
                 </Flex>
               </Theme>
             </CardFooter>
-            <CardHeader className={"p-0"}>
+            <CardHeader hidden className={"p-0"}>
               <CardTitle>{title}</CardTitle>
               <CardDescription>{description}</CardDescription>
             </CardHeader>
@@ -263,7 +263,7 @@ function ContentWrapperWithMenu({
   children,
 }: WindowContentProps & { mergedMenuConfig: MenuConfig[] }) {
   const { getMergedMenu } = useMenuRegistry();
-  
+
   const finalMergedMenuConfig = useMemo(() => {
     return getMergedMenu(menuConfig);
   }, [getMergedMenu, menuConfig]);
@@ -461,9 +461,9 @@ export function StoreDraggableWindow({
   return (
     <>
       {trigger || defaultTrigger}
-      
+
       {enableMenuRegistry ? (
-        <MenuRegistryProvider 
+        <MenuRegistryProvider
           defaultMenuConfig={menuConfig}
           enableMenuRegistry={enableMenuRegistry}
         >

@@ -22,15 +22,16 @@ export interface MenuRegistryContextType {
     mergeStrategy?: 'append' | 'prepend' | 'replace';
     exclusive?: boolean; // New: exclusive menu control
   }) => void;
-
+  
   unregisterMenu: (id: string) => void;
+  unregisterComponentMenus: (componentName: string) => void; // New: unregister all menus for a component
   updateMenu: (id: string, config: MenuConfig[]) => void;
-
+  
   // Query methods
   getRegisteredMenus: () => RegisteredMenuConfig[];
   getMergedMenu: (overrideConfig?: MenuConfig[]) => MenuConfig[];
   getMenuByComponent: (componentName: string) => RegisteredMenuConfig[];
-
+  
   // State
   isMenuRegistryEnabled: boolean;
   setMenuRegistryEnabled: (enabled: boolean) => void;
@@ -45,6 +46,9 @@ const createNoOpMenuRegistry = (defaultMenuConfig: MenuConfig[] = []): MenuRegis
     // Intentionally empty - no-op when not in context
   },
   unregisterMenu: () => {
+    // Intentionally empty - no-op when not in context
+  },
+  unregisterComponentMenus: () => {
     // Intentionally empty - no-op when not in context
   },
   updateMenu: () => {
@@ -75,18 +79,18 @@ export interface MenuRegistryProviderProps {
 }
 
 export function MenuRegistryProvider({
-                                       children,
-                                       enableMenuRegistry = true,
-                                       defaultMenuConfig = [],
-                                       onMenuChange
-                                     }: MenuRegistryProviderProps) {
+  children,
+  enableMenuRegistry = true,
+  defaultMenuConfig = [],
+  onMenuChange
+}: MenuRegistryProviderProps) {
   const [registeredMenus, setRegisteredMenus] = useState<RegisteredMenuConfig[]>([]);
   const [isMenuRegistryEnabled, setMenuRegistryEnabled] = useState(enableMenuRegistry);
 
   // Registration methods
   const registerMenu = useCallback((
-    id: string,
-    config: MenuConfig[],
+    id: string, 
+    config: MenuConfig[], 
     options: {
       componentName?: string;
       priority?: 'high' | 'normal' | 'low';
@@ -94,29 +98,38 @@ export function MenuRegistryProvider({
       exclusive?: boolean;
     } = {}
   ) => {
-    if (!isMenuRegistryEnabled) return;
+    if (!isMenuRegistryEnabled || !config.length) return;
 
-    const {
-      componentName = 'Unknown',
-      priority = 'normal',
+    const { 
+      componentName = 'Unknown', 
+      priority = 'normal', 
       mergeStrategy = 'append',
       exclusive = false // Default to non-exclusive
     } = options;
-
-    const registeredConfig: RegisteredMenuConfig = {
-      id,
-      componentName,
-      priority,
-      mergeStrategy,
-      timestamp: Date.now(),
-      exclusive,
-      ...config[0], // Spread the first menu config
-    };
+    
+    // Create menu entries for each menu config
+    const newMenuEntries: RegisteredMenuConfig[] = config.map((menuConfig, index) => {
+      const menuId = config.length === 1 ? id : `${id}-${index + 1}`;
+      return {
+        id: menuId,
+        componentName,
+        priority,
+        mergeStrategy,
+        timestamp: Date.now() + index, // Slight offset to preserve order
+        exclusive,
+        ...menuConfig,
+      };
+    });
 
     setRegisteredMenus(prev => {
-      const filtered = prev.filter(menu => menu.id !== id);
-      const newMenus = [...filtered, registeredConfig];
-
+      // Remove existing menus for this component and base ID
+      const filtered = prev.filter(menu => 
+        menu.componentName !== componentName && 
+        !menu.id.startsWith(id)
+      );
+      
+      const newMenus = [...filtered, ...newMenuEntries];
+      
       // Sort by priority (high > normal > low) and then by timestamp
       const sortedMenus = newMenus.sort((a, b) => {
         const priorityOrder = { high: 3, normal: 2, low: 1 };
@@ -134,6 +147,15 @@ export function MenuRegistryProvider({
   const unregisterMenu = useCallback((id: string) => {
     setRegisteredMenus(prev => {
       const filtered = prev.filter(menu => menu.id !== id);
+      onMenuChange?.(filtered);
+      return filtered;
+    });
+  }, [onMenuChange]);
+
+  // New: Unregister all menus for a specific component
+  const unregisterComponentMenus = useCallback((componentName: string) => {
+    setRegisteredMenus(prev => {
+      const filtered = prev.filter(menu => menu.componentName !== componentName);
       onMenuChange?.(filtered);
       return filtered;
     });
@@ -169,7 +191,7 @@ export function MenuRegistryProvider({
 
     // Check if any component has registered an exclusive menu
     const hasExclusiveMenus = registeredMenus.some(menu => menu.exclusive);
-
+    
     // If no menus are registered, return the default
     if (registeredMenus.length === 0) {
       return overrideConfig || defaultMenuConfig;
@@ -181,7 +203,7 @@ export function MenuRegistryProvider({
 
       // Group menus by label for intelligent merging
       const menuGroups = new Map<string, RegisteredMenuConfig[]>();
-
+      
       registeredMenus.forEach(menu => {
         const existing = menuGroups.get(menu.label) || [];
         menuGroups.set(menu.label, [...existing, menu]);
@@ -196,10 +218,10 @@ export function MenuRegistryProvider({
         } else {
           // Multiple menus with same label, merge their content
           const allContent: MenuContentItem[] = [];
-
+          
           menusWithSameLabel.forEach(menu => {
             const { content, mergeStrategy } = menu;
-
+            
             switch (mergeStrategy) {
               case 'prepend':
                 allContent.unshift(...content);
@@ -243,7 +265,7 @@ export function MenuRegistryProvider({
 
     // Group menus by label for intelligent merging
     const menuGroups = new Map<string, RegisteredMenuConfig[]>();
-
+    
     registeredMenus.forEach(menu => {
       const existing = menuGroups.get(menu.label) || [];
       menuGroups.set(menu.label, [...existing, menu]);
@@ -258,10 +280,10 @@ export function MenuRegistryProvider({
       } else {
         // Multiple menus with same label, merge their content
         const allContent: MenuContentItem[] = [];
-
+        
         menusWithSameLabel.forEach(menu => {
           const { content, mergeStrategy } = menu;
-
+          
           switch (mergeStrategy) {
             case 'prepend':
               allContent.unshift(...content);
@@ -309,6 +331,7 @@ export function MenuRegistryProvider({
   const contextValue: MenuRegistryContextType = {
     registerMenu,
     unregisterMenu,
+    unregisterComponentMenus, // New method
     updateMenu,
     getRegisteredMenus,
     getMergedMenu,
@@ -327,12 +350,12 @@ export function MenuRegistryProvider({
 // Hook to use the menu registry
 export function useMenuRegistry(defaultMenuConfig?: MenuConfig[]) {
   const context = useContext(MenuRegistryContext);
-
+  
   if (!context) {
     // Return graceful fallback instead of throwing error
     return createNoOpMenuRegistry(defaultMenuConfig);
   }
-
+  
   return context;
 }
 
@@ -348,16 +371,17 @@ export function withMenuRegistration<P extends object>(
   } = {}
 ) {
   const { menuId, priority = 'normal', mergeStrategy = 'append', exclusive = false } = options;
-
+  
   function MenuRegisteredComponent(props: P) {
-    const { registerMenu, unregisterMenu } = useMenuRegistry();
+    const { registerMenu, unregisterMenu, unregisterComponentMenus } = useMenuRegistry();
     const componentName = WrappedComponent.displayName || WrappedComponent.name || 'UnknownComponent';
-
+    
     useEffect(() => {
       const config = typeof menuConfig === 'function' ? menuConfig(props) : menuConfig;
+      const configs = Array.isArray(config) ? config : [config];
       const id = menuId || `${componentName.toLowerCase()}-menu`;
-
-      registerMenu(id, Array.isArray(config) ? config : [config], {
+      
+      registerMenu(id, configs, {
         componentName,
         priority,
         mergeStrategy,
@@ -365,9 +389,10 @@ export function withMenuRegistration<P extends object>(
       });
 
       return () => {
-        unregisterMenu(id);
+        // Use the new method to clean up all component menus
+        unregisterComponentMenus(componentName);
       };
-    }, [props, registerMenu, unregisterMenu, componentName, menuId, priority, mergeStrategy, exclusive]);
+    }, [props, registerMenu, unregisterComponentMenus, componentName, menuId, priority, mergeStrategy, exclusive]);
 
     return <WrappedComponent {...props} />;
   }
@@ -381,7 +406,7 @@ export function withMenuRegistration<P extends object>(
 // Cleanup effect for unmounted components
 export function useMenuCleanup(menuId: string) {
   const { unregisterMenu } = useMenuRegistry();
-
+  
   useEffect(() => {
     return () => {
       unregisterMenu(menuId);

@@ -6,10 +6,11 @@ import {Calculator} from "@/components/os/Calculator";
 import StoreDemo from "@/app/store-demo";
 import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
 import {WindowTracker} from "@/components/os/WindowTracker";
-import {IconCalculator} from "@tabler/icons-react";
+import {IconCalculator, IconFileTextFilled} from "@tabler/icons-react";
 import {Button} from "@/components/ui/button";
 import {MenuRegistryProvider} from "@/components/os/MenuRegistryContext";
 import {MenuRegistryDemo} from "@/components/os/MenuRegistryDemo";
+import {TextEditor} from "@/components/os/TextEditor";
 
 export default function Home() {
   return (
@@ -62,7 +63,17 @@ export default function Home() {
         <Calculator />
       </StoreDraggableWindow>
 
-      <MenuRegistryDemo />
+      <StoreDraggableWindow
+        title="Calculator Window"
+        description="A draggable store-managed calculator window"
+        type="draggable"
+        defaultPosition={{ x: 0, y: 100 }}
+        trigger={<Button><IconFileTextFilled /></Button>}
+      >
+        <TextEditor />
+      </StoreDraggableWindow>
+
+      {/*<MenuRegistryDemo />*/}
 
       {/*<StoreDemo />*/}
     </div>
