@@ -68,7 +68,7 @@ export default function Home() {
         title="Text Editor Window"
         description="A draggable store-managed Text Editor window"
         type="draggable"
-        defaultPosition={{ x: 0, y: 100 }}
+        defaultPosition={{ x: 20, y: 100 }}
         trigger={<Button><IconFileTextFilled /></Button>}
       >
         <TextEditor />

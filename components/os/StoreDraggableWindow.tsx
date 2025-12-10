@@ -84,10 +84,14 @@ const WindowContent = memo(function WindowContent({
         disabled={windowState === "closed" || windowState === "minimized"}
         nodeRef={draggableRef}
       >
-        <div ref={draggableRef}>
+        <div
+          ref={draggableRef}
+          style={{ zIndex: window?.zIndex || 100, position: "absolute" }}
+        >
           <Card
+            id={window?.id}
             className={cn(
-              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto max-h-[calc(100vh-8rem)] gap-1",
+              "p-4 pt-2 w-2xl max-w-4xl h-auto max-h-[calc(100vh-8rem)] gap-1",
               windowState === "closed" ? "card-animate--exit" : "card-animate",
               "transition-all duration-800 ease-in-out",
               windowState === "maximized" &&
@@ -314,7 +318,7 @@ export function StoreDraggableWindow({
   enableMenuRegistry = true,
 }: StoreDraggableWindowProps) {
   const { createWindow, updateWindow, closeWindow, bringToFront } = useWindowManagement();
-  const { getWindowById, nextZIndex } = useWindowState();
+  const { getWindowById, windowCount } = useWindowState();
   const [currentOsType, setCurrentOsType] = React.useState<"mac" | "others">(osType);
   const draggableRef = useRef<HTMLDivElement>(null);
 
@@ -413,11 +417,11 @@ export function StoreDraggableWindow({
     if (effectiveWindowId) {
       const currentWindow = getWindowById(effectiveWindowId);
       // Check if window is already at front (zIndex === nextZIndex - 1)
-      if (!currentWindow || currentWindow.zIndex !== nextZIndex - 1) {
+      if (!currentWindow || currentWindow.zIndex !== windowCount - 1) {
         bringToFront(effectiveWindowId);
       }
     }
-  }, [windowId, createdWindowId, bringToFront, getWindowById, nextZIndex]);
+  }, [windowId, createdWindowId, bringToFront, getWindowById, windowCount]);
 
   const defaultTrigger = useMemo(() => (
     <Button variant="outline" onClick={handleTriggerClick}>
