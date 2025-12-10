@@ -578,7 +578,10 @@ export default function Editor() {
       {hiddenFileInput}
 
       {/* The actual BlockNote editor */}
-      <BlockNoteView editor={editor} />
+      <BlockNoteView
+        editor={editor}
+        style={{ minHeight: '160px', height: 'auto' }}
+      />
 
       {/* Status Bar */}
       <Flex align={'center'} justify={'between'} className="pt-4 bg-card text-sm">

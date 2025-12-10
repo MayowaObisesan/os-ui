@@ -67,3 +67,9 @@
         transform: none;
     }
 }
+
+
+/* THE BLOCKNOTE EDITOR STYLES */
+.bn-editor {
+    min-height: 200px;
+}
