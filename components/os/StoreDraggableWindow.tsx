@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { memo, useCallback, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { DynamicOSMenu, defaultOSMenuConfig, MenuConfig } from "@/components/os/DynamicMenu";
+import { MenuRegistryProvider, useMenuRegistry } from "@/components/os/MenuRegistryContext";
 import { Flex, Theme } from "@radix-ui/themes";
 import { LucideMaximize2, LucideMinimize2, LucideMinus, LucideX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useCallback, useRef, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Draggable from "react-draggable";
@@ -29,6 +29,269 @@ export interface StoreDraggableWindowProps {
   className?: string;
   type?: "basic" | "draggable" | "calculator" | string;
   defaultPosition?: { x: number; y: number };
+  enableMenuRegistry?: boolean;
+}
+
+interface WindowContentProps {
+  windowId?: string;
+  createdWindowId: string | null;
+  title: string;
+  description: string;
+  menuConfig: MenuConfig[];
+  currentOsType: "mac" | "others";
+  window: any;
+  windowState: string;
+  draggableRef: React.RefObject<HTMLDivElement>;
+  defaultPosition: { x: number; y: number };
+  className?: string;
+  handleClose: () => void;
+  handleMinimize: () => void;
+  handleMaximize: () => void;
+  handleWindowClick: () => void;
+  handleDrag: (e: any, data: { x: number; y: number }) => void;
+  handleStop: (e: any, data: { x: number; y: number }) => void;
+  mergedMenuConfig: MenuConfig[];
+  children: React.ReactNode;
+}
+
+// Memoized window content component to prevent unnecessary re-renders
+const WindowContent = memo(function WindowContent({
+  title,
+  description,
+  currentOsType,
+  window,
+  windowState,
+  draggableRef,
+  defaultPosition,
+  className,
+  handleClose,
+  handleMinimize,
+  handleMaximize,
+  handleWindowClick,
+  handleDrag,
+  handleStop,
+  mergedMenuConfig,
+  children,
+}: WindowContentProps) {
+  return (
+    <Flex align={"center"} className={"bg-orange-400"} justify={"center"}>
+      <Draggable
+        handle=".window-drag-handle"
+        bounds={"body"}
+        position={window?.position || defaultPosition}
+        onDrag={handleDrag}
+        onStop={handleStop}
+        disabled={windowState === "closed" || windowState === "minimized"}
+        nodeRef={draggableRef}
+      >
+        <div ref={draggableRef}>
+          <Card
+            className={cn(
+              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto",
+              windowState === "closed" ? "card-animate--exit" : "card-animate",
+              "transition-all duration-800 ease-in-out",
+              windowState === "maximized" &&
+                "w-[calc(100vw-4rem)] max-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-8",
+              className
+            )}
+            onClick={handleWindowClick}
+          >
+            <CardFooter className={"p-0"}>
+              <Theme className={"w-full"}>
+                <Flex
+                  className={cn(
+                    "w-full cursor-move select-none window-drag-handle",
+                    currentOsType === "others" ? "flex-row-reverse" : "flex-row justify-between"
+                  )}
+                  gap={"2"}
+                >
+                  <Flex
+                    className={cn(currentOsType === "others" ? "flex-row-reverse flex-1" : "")}
+                    align={"center"}
+                    gapX={"2"}
+                    pl={"0"}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className={cn(
+                            "size-4 transition-colors",
+                            windowState === "minimized" ? "bg-gray-400!" : "bg-[tomato]! text-black",
+                            windowState !== "open" ? "pointer-events-none" : "pointer-events-auto"
+                          )}
+                          size={"icon"}
+                          onClick={handleClose}
+                          tabIndex={-1}
+                        >
+                          <LucideX className={"size-2.5"} strokeWidth={4} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>Close</span>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className={cn(
+                            "size-4 transition-colors",
+                            windowState === "minimized" ? "bg-gray-400!" : "bg-amber-400! text-black"
+                          )}
+                          size={"icon"}
+                          onClick={handleMinimize}
+                          tabIndex={-1}
+                        >
+                          <LucideMinus className={"size-2.5"} strokeWidth={4} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>Minimize</span>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className={cn(
+                            "size-4 transition-colors",
+                            windowState === "maximized" ? "bg-green-600!" : "bg-green-500! text-black"
+                          )}
+                          size={"icon"}
+                          onClick={handleMaximize}
+                          tabIndex={-1}
+                        >
+                          {windowState === "maximized" ? (
+                            <LucideMinimize2 className={"size-2"} strokeWidth={4} />
+                          ) : (
+                            <LucideMaximize2 className={"size-2"} strokeWidth={4} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>{windowState === "maximized" ? "Restore" : "Maximize"}</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  </Flex>
+                  <DynamicOSMenu menus={mergedMenuConfig} className="flex-1" />
+                </Flex>
+              </Theme>
+            </CardFooter>
+            <CardHeader className={"p-0"}>
+              <CardTitle>{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </CardHeader>
+            <CardContent className={"p-0"}>{children}</CardContent>
+          </Card>
+        </div>
+      </Draggable>
+    </Flex>
+  );
+});
+
+// Content wrapper component that receives all necessary props
+interface ContentWrapperProps extends WindowContentProps {
+  mergedMenuConfig: MenuConfig[];
+}
+
+const ContentWrapper = memo(function ContentWrapper({
+  windowId,
+  createdWindowId,
+  title,
+  description,
+  menuConfig,
+  currentOsType,
+  window,
+  windowState,
+  draggableRef,
+  defaultPosition,
+  className,
+  handleClose,
+  handleMinimize,
+  handleMaximize,
+  handleWindowClick,
+  handleDrag,
+  handleStop,
+  mergedMenuConfig,
+  children,
+}: ContentWrapperProps) {
+  return (
+    <WindowContent
+      windowId={windowId}
+      createdWindowId={createdWindowId}
+      title={title}
+      description={description}
+      menuConfig={menuConfig}
+      currentOsType={currentOsType}
+      window={window}
+      windowState={windowState}
+      draggableRef={draggableRef}
+      defaultPosition={defaultPosition}
+      className={className}
+      handleClose={handleClose}
+      handleMinimize={handleMinimize}
+      handleMaximize={handleMaximize}
+      handleWindowClick={handleWindowClick}
+      handleDrag={handleDrag}
+      handleStop={handleStop}
+      mergedMenuConfig={mergedMenuConfig}
+    >
+      {children}
+    </WindowContent>
+  );
+});
+
+// Component to handle menu registry context
+function ContentWrapperWithMenu({
+  windowId,
+  createdWindowId,
+  title,
+  description,
+  menuConfig,
+  currentOsType,
+  window,
+  windowState,
+  draggableRef,
+  defaultPosition,
+  className,
+  handleClose,
+  handleMinimize,
+  handleMaximize,
+  handleWindowClick,
+  handleDrag,
+  handleStop,
+  children,
+}: WindowContentProps & { mergedMenuConfig: MenuConfig[] }) {
+  const { getMergedMenu } = useMenuRegistry();
+  
+  const finalMergedMenuConfig = useMemo(() => {
+    return getMergedMenu(menuConfig);
+  }, [getMergedMenu, menuConfig]);
+
+  return (
+    <ContentWrapper
+      windowId={windowId}
+      createdWindowId={createdWindowId}
+      title={title}
+      description={description}
+      menuConfig={menuConfig}
+      currentOsType={currentOsType}
+      window={window}
+      windowState={windowState}
+      draggableRef={draggableRef}
+      defaultPosition={defaultPosition}
+      className={className}
+      handleClose={handleClose}
+      handleMinimize={handleMinimize}
+      handleMaximize={handleMaximize}
+      handleWindowClick={handleWindowClick}
+      handleDrag={handleDrag}
+      handleStop={handleStop}
+      mergedMenuConfig={finalMergedMenuConfig}
+    >
+      {children}
+    </ContentWrapper>
+  );
 }
 
 export function StoreDraggableWindow({
@@ -48,42 +311,22 @@ export function StoreDraggableWindow({
   className,
   type = "draggable",
   defaultPosition = { x: 0, y: 0 },
+  enableMenuRegistry = true,
 }: StoreDraggableWindowProps) {
   const { createWindow, updateWindow, closeWindow, bringToFront } = useWindowManagement();
   const { getWindowById, nextZIndex } = useWindowState();
-  const [currentOsType, setCurrentOsType] = useState<"mac" | "others">(osType);
-  const [bounds, setBounds] = useState({ left: 0, top: 0, right: 0, bottom: 0 });
+  const [currentOsType, setCurrentOsType] = React.useState<"mac" | "others">(osType);
   const draggableRef = useRef<HTMLDivElement>(null);
 
   // Track the window ID created by this component
-  const [createdWindowId, setCreatedWindowId] = useState<string | null>(null);
-
-  // Update bounds on window resize
-  /*useEffect(() => {
-    const updateBounds = () => {
-      console.log("Store Draggable...", window, typeof window);
-      if (typeof window?.innerWidth !== "undefined") {
-        const padding = 20;
-        setBounds({
-          left: -window.innerWidth / 2 + padding,
-          top: -window.innerHeight / 2 + padding,
-          right: window.innerWidth / 2 - padding,
-          bottom: window.innerHeight / 2 - padding,
-        });
-      }
-    };
-
-    updateBounds();
-    window.addEventListener("resize", updateBounds);
-    return () => window.removeEventListener("resize", updateBounds);
-  }, []);*/
+  const [createdWindowId, setCreatedWindowId] = React.useState<string | null>(null);
 
   // Get current window state from store
   const effectiveWindowId = windowId || createdWindowId;
   const window = effectiveWindowId ? getWindowById(effectiveWindowId) : null;
   const windowState = window?.state || (open ? "open" : "closed");
 
-  // Handle window state changes
+  // Handle window state changes - memoized to prevent recreation
   const handleClose = useCallback(() => {
     const effectiveWindowId = windowId || createdWindowId;
     if (effectiveWindowId) {
@@ -140,9 +383,9 @@ export function StoreDraggableWindow({
     handleOpen();
   }, [onTriggerClick, handleOpen]);
 
-  // Handle drag events - only update store on stop for better performance
+  // Handle drag events - memoized to prevent recreation
   const handleDrag = useCallback(
-    (e: any, data: { x: number; y: number }) => {
+    (_e: any, _data: { x: number; y: number }) => {
       // Only update local position during drag for smooth performance
       // Store will be updated on stop
     },
@@ -150,7 +393,7 @@ export function StoreDraggableWindow({
   );
 
   const handleStop = useCallback(
-    (e: any, data: { x: number; y: number }) => {
+    (_e: any, data: { x: number; y: number }) => {
       const effectiveWindowId = windowId || createdWindowId;
       if (effectiveWindowId) {
         updateWindow(effectiveWindowId, { position: { x: data.x, y: data.y } });
@@ -164,7 +407,7 @@ export function StoreDraggableWindow({
     setCurrentOsType((prev) => (prev === "mac" ? "others" : "mac"));
   }, []);
 
-  // Bring window to front when clicked - only if not already at front
+  // Bring window to front when clicked - memoized
   const handleWindowClick = useCallback(() => {
     const effectiveWindowId = windowId || createdWindowId;
     if (effectiveWindowId) {
@@ -176,11 +419,33 @@ export function StoreDraggableWindow({
     }
   }, [windowId, createdWindowId, bringToFront, getWindowById, nextZIndex]);
 
-  const defaultTrigger = (
+  const defaultTrigger = useMemo(() => (
     <Button variant="outline" onClick={handleTriggerClick}>
       Open Window
     </Button>
-  );
+  ), [handleTriggerClick]);
+
+  // Common props for window content
+  const windowContentProps = {
+    windowId,
+    createdWindowId,
+    title,
+    description,
+    menuConfig,
+    currentOsType,
+    window,
+    windowState,
+    draggableRef,
+    defaultPosition,
+    className,
+    handleClose,
+    handleMinimize,
+    handleMaximize,
+    handleWindowClick,
+    handleDrag,
+    handleStop,
+    children,
+  } as WindowContentProps;
 
   // If window is closed, only show trigger
   if (windowState === "closed") {
@@ -195,123 +460,18 @@ export function StoreDraggableWindow({
 
   return (
     <>
-      <>
-        {trigger || defaultTrigger}
-      </>
-
-      <Flex align={"center"} className={"bg-orange-400"} justify={"center"}>
-        <Draggable
-          handle=".window-drag-handle"
-          bounds={"body"}
-          position={window?.position || defaultPosition}
-          onDrag={handleDrag}
-          onStop={handleStop}
-          disabled={windowState === "closed" || windowState === "minimized"}
-          nodeRef={draggableRef}
+      {trigger || defaultTrigger}
+      
+      {enableMenuRegistry ? (
+        <MenuRegistryProvider 
+          defaultMenuConfig={menuConfig}
+          enableMenuRegistry={enableMenuRegistry}
         >
-          <div ref={draggableRef}>
-            <Card
-              className={cn(
-                "absolute p-4 pt-2 w-2xl max-w-4xl h-auto",
-                windowState === "closed" ? "card-animate--exit" : "card-animate",
-                "transition-all duration-800 ease-in-out",
-                windowState === "maximized" &&
-                  "w-[calc(100vw-4rem)] max-w-[calc(100vw-4rem)] h-[calc(100vh-8rem)] -mt-8",
-                className
-              )}
-              onClick={handleWindowClick}
-            >
-              <CardFooter className={"p-0"}>
-                <Theme className={"w-full"}>
-                  <Flex
-                    className={cn(
-                      "w-full cursor-move select-none window-drag-handle",
-                      currentOsType === "others" ? "flex-row-reverse" : "flex-row justify-between"
-                    )}
-                    gap={"2"}
-                    // onDoubleClick={toggleOsType}
-                  >
-                    <Flex
-                      className={cn(currentOsType === "others" ? "flex-row-reverse flex-1" : "")}
-                      align={"center"}
-                      gapX={"2"}
-                      pl={"0"}
-                    >
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className={cn(
-                              "size-4 transition-colors",
-                              windowState === "minimized" ? "bg-gray-400!" : "bg-[tomato]! text-black",
-                              windowState !== "open" ? "pointer-events-none" : "pointer-events-auto"
-                            )}
-                            size={"icon"}
-                            onClick={handleClose}
-                            tabIndex={-1}
-                          >
-                            <LucideX className={"size-2.5"} strokeWidth={4} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span>Close</span>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className={cn(
-                              "size-4 transition-colors",
-                              windowState === "minimized" ? "bg-gray-400!" : "bg-amber-400! text-black"
-                            )}
-                            size={"icon"}
-                            onClick={handleMinimize}
-                            tabIndex={-1}
-                          >
-                            <LucideMinus className={"size-2.5"} strokeWidth={4} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span>Minimize</span>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className={cn(
-                              "size-4 transition-colors",
-                              windowState === "maximized" ? "bg-green-600!" : "bg-green-500! text-black"
-                            )}
-                            size={"icon"}
-                            onClick={handleMaximize}
-                            tabIndex={-1}
-                          >
-                            {windowState === "maximized" ? (
-                              <LucideMinimize2 className={"size-2"} strokeWidth={4} />
-                            ) : (
-                              <LucideMaximize2 className={"size-2"} strokeWidth={4} />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span>{windowState === "maximized" ? "Restore" : "Maximize"}</span>
-                        </TooltipContent>
-                      </Tooltip>
-                    </Flex>
-                    <DynamicOSMenu menus={menuConfig} className="flex-1" />
-                  </Flex>
-                </Theme>
-              </CardFooter>
-              <CardHeader className={"p-0"}>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-              </CardHeader>
-              <CardContent className={"p-0"}>{children}</CardContent>
-            </Card>
-          </div>
-        </Draggable>
-      </Flex>
+          <ContentWrapperWithMenu {...windowContentProps} />
+        </MenuRegistryProvider>
+      ) : (
+        <ContentWrapper {...windowContentProps} mergedMenuConfig={menuConfig} />
+      )}
     </>
   );
 }

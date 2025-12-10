@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo, createContext, useContext } from "react";
+import { useState, useCallback, useMemo, createContext, useContext, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MenuConfig } from "@/components/os/DynamicMenu";
+import { useMenuRegistry } from "@/components/os/MenuRegistryContext";
 
 type Operation = '+' | '-' | '×' | '÷' | null;
 
@@ -29,6 +30,7 @@ export interface CalculatorProps {
 
 export function Calculator({ onMenuConfig }: CalculatorProps = {}) {
   const [state, setState] = useState<CalculatorState>(initialState);
+  const { registerMenu, unregisterMenu } = useMenuRegistry();
 
   const inputNumber = useCallback((num: string) => {
     setState(prevState => {
@@ -221,6 +223,78 @@ export function Calculator({ onMenuConfig }: CalculatorProps = {}) {
       maximumFractionDigits: 10,
     });
   };
+
+  // Register calculator menu when component mounts
+  useEffect(() => {
+    const calculatorMenu: MenuConfig[] = [
+      {
+        label: 'Calculator',
+        content: [
+          {
+            type: 'item',
+            label: 'Copy Result',
+            shortcut: { keys: '⌘C' },
+            onClick: () => {
+              navigator.clipboard.writeText(state.display).then(() => {
+                console.log('Result copied to clipboard');
+              });
+            }
+          },
+          {
+            type: 'item',
+            label: 'Clear All',
+            shortcut: { keys: '⌘⌫' },
+            onClick: clear
+          },
+          { type: 'separator' },
+          {
+            type: 'checkbox',
+            label: 'Show Memory Indicator',
+            checked: true,
+            onCheckedChange: (checked) => {
+              console.log('Memory indicator:', checked ? 'shown' : 'hidden');
+            }
+          }
+        ]
+      },
+      {
+        label: 'Memory',
+        content: [
+          {
+            type: 'item',
+            label: 'Memory Store (M+)',
+            shortcut: { keys: '⌘M' },
+            onClick: memoryAdd
+          },
+          {
+            type: 'item',
+            label: 'Memory Subtract (M-)',
+            onClick: memorySubtract
+          },
+          {
+            type: 'item',
+            label: 'Memory Recall (MR)',
+            onClick: memoryRecall
+          },
+          {
+            type: 'item',
+            label: 'Memory Clear (MC)',
+            onClick: memoryClear
+          }
+        ]
+      }
+    ];
+
+    registerMenu('calculator-menu', calculatorMenu, {
+      componentName: 'Calculator',
+      priority: 'high',
+      mergeStrategy: 'append'
+    });
+
+    return () => {
+      unregisterMenu('calculator-menu');
+    };
+  }, [state.display, registerMenu, unregisterMenu, clear, memoryAdd, memorySubtract, memoryRecall, memoryClear]);
 
   return (
     <div className="w-full mx-auto p-4 rounded-lg">

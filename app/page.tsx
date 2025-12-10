@@ -8,6 +8,8 @@ import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
 import {WindowTracker} from "@/components/os/WindowTracker";
 import {IconCalculator} from "@tabler/icons-react";
 import {Button} from "@/components/ui/button";
+import {MenuRegistryProvider} from "@/components/os/MenuRegistryContext";
+import {MenuRegistryDemo} from "@/components/os/MenuRegistryDemo";
 
 export default function Home() {
   return (
@@ -59,6 +61,8 @@ export default function Home() {
       >
         <Calculator />
       </StoreDraggableWindow>
+
+      <MenuRegistryDemo />
 
       {/*<StoreDemo />*/}
     </div>
