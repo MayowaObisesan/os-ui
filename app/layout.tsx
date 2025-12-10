@@ -79,7 +79,9 @@ export default function RootLayout({
                 </BackgroundGradientAnimation>
               </Box>
 
-              {children}
+              <div id={'page-container-portal'} className={'page-container-portal h-dvh w-full overflow-hidden relative'}>
+                {children}
+              </div>
 
               <Box className={'z-[1000]!'} position={'fixed'} bottom={'4'} width={'100%'}>
                 <OSDock />

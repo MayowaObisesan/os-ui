@@ -64,7 +64,7 @@ export default function Home() {
           description="A draggable store-managed calculator window"
           type="draggable"
           defaultPosition={{ x: 0, y: 100 }}
-          trigger={<Button size={'icon'}><IconCalculator /></Button>}
+          trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconCalculator /></Button>}
         >
           <Calculator />
         </StoreDraggableWindow>
@@ -74,7 +74,7 @@ export default function Home() {
           description="A draggable store-managed Text Editor window"
           type="draggable"
           defaultPosition={{ x: 20, y: 100 }}
-          trigger={<Button size={'icon'}><IconFileTextFilled /></Button>}
+          trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextFilled /></Button>}
         >
           <TextEditor />
         </StoreDraggableWindow>
@@ -84,7 +84,7 @@ export default function Home() {
           description="A draggable store-managed Note Editor window - An Advanced Note Editor that feels like using Notion"
           type="draggable"
           defaultPosition={{ x: 20, y: 100 }}
-          trigger={<Button size={'icon'}><IconFileTextSpark /></Button>}
+          trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextSpark /></Button>}
         >
           <NoteEditor />
         </StoreDraggableWindow>
@@ -94,7 +94,7 @@ export default function Home() {
           description="A draggable store-managed embed page window"
           type="draggable"
           defaultPosition={{ x: 0, y: 0 }}
-          trigger={<Button size={'icon'}><IconGlobe /></Button>}
+          trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconGlobe /></Button>}
         >
           <HomeOld />
         </StoreDraggableWindow>

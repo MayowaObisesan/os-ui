@@ -1,6 +1,7 @@
 "use client";
 
-import React, { memo, useCallback, useMemo, useRef } from "react";
+import React, {memo, useCallback, useEffect, useMemo, useRef} from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { DynamicOSMenu, defaultOSMenuConfig, MenuConfig } from "@/components/os/DynamicMenu";
 import { MenuRegistryProvider, useMenuRegistry } from "@/components/os/MenuRegistryContext";
@@ -85,9 +86,9 @@ const WindowContent = memo(function WindowContent({
         nodeRef={draggableRef}
       >
         <div
-          className={'absolute rounded-md shadow-lg drop-shadow-black delay-800 transition-colors duration-800 ease-in-out'}
+          className={'rounded-md shadow-lg drop-shadow-black delay-800 transition-colors duration-800 ease-in-out'}
           ref={draggableRef}
-          style={{ zIndex: window?.zIndex || 100, position: "absolute" }}
+          style={{ zIndex: window?.zIndex || 100, position: "absolute", top: 0, left: 0 }}
         >
           <Card
             className={cn(
@@ -330,6 +331,10 @@ export function StoreDraggableWindow({
   const window = effectiveWindowId ? getWindowById(effectiveWindowId) : null;
   const windowState = window?.state || (open ? "open" : "closed");
 
+  useEffect(() => {
+    if (open) handleOpen();
+  }, [open]);
+
   // Handle window state changes - memoized to prevent recreation
   const handleClose = useCallback(() => {
     const effectiveWindowId = windowId || createdWindowId;
@@ -465,7 +470,7 @@ export function StoreDraggableWindow({
     <>
       {trigger || defaultTrigger}
 
-      {enableMenuRegistry ? (
+      {createPortal(enableMenuRegistry ? (
         <MenuRegistryProvider
           defaultMenuConfig={menuConfig}
           enableMenuRegistry={enableMenuRegistry}
@@ -474,7 +479,7 @@ export function StoreDraggableWindow({
         </MenuRegistryProvider>
       ) : (
         <ContentWrapper {...windowContentProps} mergedMenuConfig={menuConfig} />
-      )}
+      ), document.querySelector("#page-container-portal") as HTMLElement)}
     </>
   );
 }
