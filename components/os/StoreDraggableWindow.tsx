@@ -74,7 +74,7 @@ const WindowContent = memo(function WindowContent({
   children,
 }: WindowContentProps) {
   return (
-    <Flex align={"center"} className={"bg-orange-400"} justify={"center"}>
+    <Flex align={"center"} className={""} justify={"center"}>
       <Draggable
         handle=".window-drag-handle"
         bounds={"body"}
@@ -87,7 +87,7 @@ const WindowContent = memo(function WindowContent({
         <div ref={draggableRef}>
           <Card
             className={cn(
-              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto gap-1",
+              "absolute p-4 pt-2 w-2xl max-w-4xl h-auto max-h-[calc(100vh-8rem)] gap-1",
               windowState === "closed" ? "card-animate--exit" : "card-animate",
               "transition-all duration-800 ease-in-out",
               windowState === "maximized" &&
@@ -181,7 +181,7 @@ const WindowContent = memo(function WindowContent({
               <CardTitle>{title}</CardTitle>
               <CardDescription>{description}</CardDescription>
             </CardHeader>
-            <CardContent className={"p-0"}>{children}</CardContent>
+            <CardContent className={"p-0 overflow-y-auto"}>{children}</CardContent>
           </Card>
         </div>
       </Draggable>
