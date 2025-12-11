@@ -10,7 +10,7 @@ import {
   IconNewSection,
   IconSettings,
   IconTerminal2,
-  IconLockOff
+  IconLockOff, IconLock
 } from "@tabler/icons-react";
 import {DockOptions} from "@/components/Dock/DockOptions";
 import {ModeToggle} from "@/components/mode-toggle";
@@ -103,6 +103,13 @@ export function OSDock() {
       title: "Settings",
       icon: (
         <IconSettings className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      ),
+      href: "#",
+    },
+    {
+      title: "Lock",
+      icon: (
+        <IconLock className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },

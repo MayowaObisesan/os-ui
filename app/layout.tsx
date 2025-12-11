@@ -6,9 +6,9 @@ import {OSDock} from "@/components/os/FloatingDock";
 import {Box} from "@radix-ui/themes";
 import {ThemeProvider} from "@/components/theme-provider";
 import {WindowStoreProvider} from "@/lib/store/WindowStoreProvider";
-import Image from "next/image";
 import {BackgroundGradientAnimation} from "@/components/ui/background-gradient-animation";
 import "@/styles/card-animations.css";
+import LockScreenDemo from "@/app/lockscreen-demo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -78,6 +78,8 @@ export default function RootLayout({
                   </div>*/}
                 </BackgroundGradientAnimation>
               </Box>
+
+              {/*<LockScreenDemo />*/}
 
               <div id={'page-container-portal'} className={'page-container-portal h-dvh w-full overflow-hidden relative'}>
                 {children}
