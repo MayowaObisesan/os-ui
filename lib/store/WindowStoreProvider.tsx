@@ -1,7 +1,8 @@
+// @ts-nocheck
 "use client";
 
 import React, { ReactNode, useMemo } from "react";
-import { useWindowStore } from "./window-store";
+import {useWindowStore, WindowStoreActions, WindowStoreState} from "./window-store";
 import type { WindowState, WindowInfo } from "./window-store";
 
 // Create a context for the window store

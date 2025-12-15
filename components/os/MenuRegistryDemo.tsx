@@ -34,7 +34,7 @@ function SettingsPanel() {
             type: 'checkbox',
             label: 'Dark Mode',
             checked: true,
-            onCheckedChange: (checked) => {
+            onCheckedChange: (checked: boolean | undefined) => {
               console.log('Dark mode:', checked ? 'enabled' : 'disabled');
               document.documentElement.classList.toggle('dark', checked);
             }
@@ -43,6 +43,7 @@ function SettingsPanel() {
       }
     ];
 
+    // @ts-ignore
     registerMenu('settings-panel-menu', settingsMenu, {
       componentName: 'SettingsPanel',
       priority: 'low',

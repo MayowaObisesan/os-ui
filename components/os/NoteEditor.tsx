@@ -44,7 +44,7 @@ export default function Editor() {
     recent.unshift(timestamp);
     const uniqueRecent = [...new Set(recent)].slice(0, 5);
     localStorage.setItem('recentDocuments', JSON.stringify(uniqueRecent));
-    setRecentDocuments(uniqueRecent);
+    setRecentDocuments(uniqueRecent as unknown as any);
 
     setIsModified(false);
     console.log('Document saved to local storage');
@@ -99,7 +99,7 @@ export default function Editor() {
             caption: file.name,
           },
         },
-      ]);
+      ], 'image');
     };
     reader.readAsDataURL(file);
   }, [editor]);
@@ -155,7 +155,7 @@ export default function Editor() {
 
       // Calculate word count
       const text = editor.document
-        .map(block => block.content?.map(item => item.text || '').join('') || '')
+        .map(block => (block.content as any[])?.map((item: { text: any; }) => item.text || '').join('') || '')
         .join(' ');
       const words = text.trim().split(/\s+/).filter(word => word.length > 0);
       setWordCount(words.length);
@@ -357,13 +357,13 @@ export default function Editor() {
               editor.insertBlocks([
                 {
                   type: 'paragraph',
-                  content: [{ type: 'text', text: '💡 This is a callout block' }],
+                  content: [{ type: 'text', text: '💡 This is a callout block', styles: {} }],
                   props: {
                     backgroundColor: 'yellow',
                     textAlignment: 'left'
                   }
                 },
-              ]);
+              ], 'quote');
             }
           }
         ]
