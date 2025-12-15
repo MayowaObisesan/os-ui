@@ -41,7 +41,7 @@ interface WindowContentProps {
   menuConfig: MenuConfig[];
   currentOsType: "mac" | "others";
   window: any;
-  windowState: string;
+  windowState: "open" | "minimized" | "maximized" | "closed";
   draggableRef: React.RefObject<HTMLDivElement>;
   defaultPosition: { x: number; y: number };
   className?: string;
@@ -100,6 +100,7 @@ const WindowContent = memo(function WindowContent({
               className
             )}
             onClick={handleWindowClick}
+            onDoubleClick={handleMaximize}
           >
             <CardFooter className={"p-0"}>
               <Theme className={"w-full"}>
@@ -121,9 +122,10 @@ const WindowContent = memo(function WindowContent({
                         <Button
                           className={cn(
                             "size-4 transition-colors",
-                            windowState === "minimized" ? "bg-gray-400!" : "bg-[tomato]! text-black",
-                            windowState !== "open" ? "pointer-events-none" : "pointer-events-auto"
+                            "bg-[tomato]! text-black",
+                            windowState === "closed" ? "pointer-events-none" : "pointer-events-auto"
                           )}
+                          disabled={windowState === "minimized"}
                           size={"icon"}
                           onClick={handleClose}
                           tabIndex={-1}
@@ -141,8 +143,9 @@ const WindowContent = memo(function WindowContent({
                         <Button
                           className={cn(
                             "size-4 transition-colors",
-                            windowState === "minimized" ? "bg-gray-400!" : "bg-amber-400! text-black"
+                            "bg-amber-400! text-black"
                           )}
+                          disabled={windowState === 'minimized'}
                           size={"icon"}
                           onClick={handleMinimize}
                           tabIndex={-1}
@@ -358,7 +361,7 @@ export function StoreDraggableWindow({
     const effectiveWindowId = windowId || createdWindowId;
     if (effectiveWindowId) {
       const newState = windowState === "maximized" ? "open" : "maximized";
-      updateWindow(effectiveWindowId, { state: newState });
+      updateWindow(effectiveWindowId, { state: newState, position: { x: 20, y: 80 } });
     }
     onMaximize?.();
   }, [windowId, createdWindowId, windowState, updateWindow, onMaximize]);
@@ -460,6 +463,7 @@ export function StoreDraggableWindow({
     if (trigger) {
       // Clone the custom trigger and merge onClick handlers
       return React.cloneElement(trigger as React.ReactElement, {
+        // @ts-ignore
         onClick: handleTriggerClick
       });
     }

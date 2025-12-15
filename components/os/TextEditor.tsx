@@ -75,6 +75,7 @@ export function TextEditor() {
       }
     ];
 
+    // @ts-ignore
     registerMenu('text-editor-menu', editorMenu, {
       componentName: 'TextEditor',
       priority: 'normal',

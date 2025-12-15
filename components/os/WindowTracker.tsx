@@ -68,8 +68,10 @@ export function WindowTracker() {
                 <div>
                   <strong>Window Types:</strong>
                   <div className="ml-4">
+                    {/* @ts-ignore */}
                     {Object.entries(windowStats.windowTypes).map(([type, count]) => (
                       <div key={type}>
+                        {/* @ts-ignore */}
                         {type}: {count}
                       </div>
                     ))}
@@ -80,7 +82,7 @@ export function WindowTracker() {
                   <strong>Open Windows:</strong>
                   {openWindows.length > 0 ? (
                     <ul className="ml-4 list-disc">
-                      {openWindows.map((window) => (
+                      {openWindows.map((window: any) => (
                         <li key={window.id}>
                           {window.title} ({window.type}) - {window.state}
                         </li>

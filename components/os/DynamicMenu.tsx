@@ -21,8 +21,8 @@ export interface MenuShortcut {
 }
 
 export interface MenuItem {
-  type: 'item'
-  label: string
+  type: 'item' | 'separator'
+  label?: string
   shortcut?: MenuShortcut
   disabled?: boolean
   inset?: boolean
