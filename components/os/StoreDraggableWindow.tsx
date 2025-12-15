@@ -13,6 +13,34 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Draggable from "react-draggable";
 import { useWindowManagement, useWindowState } from "@/lib/store";
 
+// Helper function to safely compare React elements without circular reference errors
+function areReactElementsEqual(a: React.ReactNode, b: React.ReactNode): boolean {
+  // If both are null/undefined
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+
+  // If both are React elements
+  if (React.isValidElement(a) && React.isValidElement(b)) {
+    // Compare type and key props that identify the icon
+    const aElement = a as React.ReactElement;
+    const bElement = b as React.ReactElement;
+
+    // Check if both have props and className
+    if (aElement.props && bElement.props && 'className' in aElement.props && 'className' in bElement.props) {
+      return (
+        aElement.type === bElement.type &&
+        aElement.props.className === bElement.props.className
+      );
+    }
+
+    // If they don't have comparable props, fall back to reference equality
+    return a === b;
+  }
+
+  // For non-React elements, use Object.is for strict equality
+  return Object.is(a, b);
+}
+
 export interface StoreDraggableWindowProps {
   windowId?: string;
   title?: string;
@@ -31,6 +59,7 @@ export interface StoreDraggableWindowProps {
   type?: "basic" | "draggable" | "calculator" | string;
   defaultPosition?: { x: number; y: number };
   enableMenuRegistry?: boolean;
+  icon?: React.ReactNode; // Icon for dock display
 }
 
 interface WindowContentProps {
@@ -249,6 +278,25 @@ const ContentWrapper = memo(function ContentWrapper({
   );
 });
 
+// Helper function to safely compare React elements without circular reference errors
+function areReactElementsEqual2(a: React.ReactNode, b: React.ReactNode): boolean {
+  // If both are null/undefined
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+
+  // If both are React elements
+  if (React.isValidElement(a) && React.isValidElement(b)) {
+    // Compare type and key props that identify the icon
+    return (
+      a.type === b.type &&
+      a.props.className === b.props.className
+    );
+  }
+
+  // For non-React elements, use Object.is for strict equality
+  return Object.is(a, b);
+}
+
 // Component to handle menu registry context
 function ContentWrapperWithMenu({
   windowId,
@@ -320,6 +368,7 @@ export function StoreDraggableWindow({
   type = "draggable",
   defaultPosition = { x: 0, y: 0 },
   enableMenuRegistry = true,
+  icon,
 }: StoreDraggableWindowProps) {
   const { createWindow, updateWindow, closeWindow, bringToFront, addWindowToDock } = useWindowManagement();
   const { getWindowById, windowCount } = useWindowState();
@@ -334,9 +383,25 @@ export function StoreDraggableWindow({
   const window = effectiveWindowId ? getWindowById(effectiveWindowId) : null;
   const windowState = window?.state || (open ? "open" : "closed");
 
+  // Ref to track previous icon value for change detection
+  const previousIconRef = React.useRef<React.ReactNode>(null);
+
   useEffect(() => {
     if (open) handleOpen();
   }, [open]);
+
+  // Update window icon if it changes (with proper change detection to prevent infinite loops)
+  useEffect(() => {
+    if (effectiveWindowId && icon !== undefined) {
+      // Only update if icon has actually changed to prevent infinite re-renders
+      const iconsAreEqual = areReactElementsEqual(previousIconRef.current, icon);
+
+      if (!iconsAreEqual) {
+        updateWindow(effectiveWindowId, { icon });
+        previousIconRef.current = icon;
+      }
+    }
+  }, [effectiveWindowId, icon, updateWindow]);
 
   // Handle window state changes - memoized to prevent recreation
   const handleClose = useCallback(() => {
@@ -370,7 +435,7 @@ export function StoreDraggableWindow({
   const handleOpen = useCallback(() => {
     if (windowId) {
       // If windowId is provided, just update the existing window
-      updateWindow(windowId, { state: "open" });
+      updateWindow(windowId, { state: "open", icon });
       bringToFront(windowId);
     } else if (!createdWindowId) {
       // If no windowId and no createdWindowId, create a new window
@@ -379,15 +444,16 @@ export function StoreDraggableWindow({
         type,
         state: "open",
         position: defaultPosition,
+        icon,
       });
       setCreatedWindowId(newWindowId);
     } else {
       // If we have a createdWindowId, update the existing window
-      updateWindow(createdWindowId, { state: "open" });
+      updateWindow(createdWindowId, { state: "open", icon });
       bringToFront(createdWindowId);
     }
     onOpenChange?.(true);
-  }, [windowId, createdWindowId, createWindow, title, type, defaultPosition, updateWindow, bringToFront, onOpenChange]);
+  }, [windowId, createdWindowId, createWindow, title, type, defaultPosition, updateWindow, bringToFront, onOpenChange, icon]);
 
   // Handle trigger click - merges custom onClick with window opening
   const handleTriggerClick = useCallback(() => {

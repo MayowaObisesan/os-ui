@@ -30,6 +30,7 @@ export interface BrowserWindowProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  icon?: React.ReactNode; // Icon for dock display
 }
 
 interface BrowserContentProps {
@@ -310,6 +311,7 @@ export function BrowserWindow({
   trigger,
   open = false,
   onOpenChange,
+  icon,
 }: BrowserWindowProps) {
   const { createWindow, updateWindow } = useWindowManagement();
   const {getWindowById} = useWindowStore();
@@ -404,6 +406,7 @@ export function BrowserWindow({
       title={title}
       description="Browser Window"
       type="browser"
+      icon={icon}
       defaultPosition={defaultPosition}
       trigger={trigger}
       open={open}

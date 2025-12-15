@@ -133,6 +133,7 @@ export default function Home() {
             <StoreDraggableWindow
               title="Calculator Window"
               description="A draggable store-managed calculator window"
+              icon={<IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               type="draggable"
               defaultPosition={{ x: 0, y: 100 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconCalculator /></Button>}
@@ -144,6 +145,7 @@ export default function Home() {
               title="Text Editor Window"
               description="A draggable store-managed Text Editor window"
               type="draggable"
+              icon={<IconFileTextFilled className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 20, y: 100 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextFilled /></Button>}
             >
@@ -154,6 +156,7 @@ export default function Home() {
               title="Note Editor Window"
               description="A draggable store-managed Note Editor window - An Advanced Note Editor that feels like using Notion"
               type="draggable"
+              icon={<IconFileTextSpark className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 20, y: 100 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextSpark /></Button>}
             >
@@ -164,6 +167,7 @@ export default function Home() {
               title="Embed Page"
               description="A draggable store-managed embed page window"
               type="draggable"
+              icon={<IconGlobe className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 0, y: 0 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconGlobe /></Button>}
             >
@@ -174,6 +178,7 @@ export default function Home() {
               windowId={'my-porfolio-window'}
               initialUrl="https://my-portfolio-rho-two-89.vercel.app/"
               title="My Portfolio"
+              icon={<IconAppWindow className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 100, y: 100 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconAppWindow /></Button>}
             />
@@ -192,6 +197,7 @@ export default function Home() {
             <BrowserWindow
               initialUrl="https://phosphoricons.com/"
               title="Phosphur icon page"
+              icon={<IconIcons className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 400, y: 50 }}
               trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconIcons /></Button>}
             />

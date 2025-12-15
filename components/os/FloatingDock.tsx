@@ -4,13 +4,15 @@ import React, { useState } from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import {
   IconBrandGithub,
-  IconBrandX, IconCalculator,
+  IconBrandX,
+  IconCalculator,
   IconExchange,
   IconHome,
   IconNewSection,
   IconSettings,
   IconTerminal2,
-  IconLockOff, IconLock
+  IconLockOff,
+  IconLock
 } from "@tabler/icons-react";
 import {DockOptions} from "@/components/Dock/DockOptions";
 import {ModeToggle} from "@/components/mode-toggle";
@@ -132,6 +134,7 @@ export function OSDock() {
         title="Calculator Window"
         description="A draggable store-managed calculator window"
         type="draggable"
+        icon={<IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
         defaultPosition={{ x: 0, y: 100 }}
         trigger={<div></div>}
         open={calculatorOpen}
