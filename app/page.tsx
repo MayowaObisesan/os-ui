@@ -43,9 +43,12 @@ import {BrowserWindow} from "@/components/os/BrowserWindow";
 import LinkInterceptor from "@/components/os/LinkInterceptor";
 import React from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import posthog from "posthog-js";
 
 export default function Home() {
   const router = useRouter();
+  posthog.capture('home_page', { property: 'click' })
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
