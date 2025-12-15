@@ -17,11 +17,14 @@ import {ModeToggle} from "@/components/mode-toggle";
 import { OSWindow } from "@/components/os/Window";
 import { Calculator } from "@/components/os/Calculator";
 import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
+import {useMinimizedWindowDockItems} from "@/components/os/DockWindowManager";
 
 export function OSDock() {
   const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const minimizedWindowDockItems = useMinimizedWindowDockItems();
 
-  const links = [
+  // Static dock items
+  const staticLinks = [
     {
       title: "Home",
       icon: (
@@ -114,12 +117,15 @@ export function OSDock() {
       href: "#",
     },
   ];
+
+  // Combine static links with minimized window dock items
+  const allDockItems = [...staticLinks, ...minimizedWindowDockItems];
   return (
     <>
       <div className="flex items-center justify-center w-full">
         <FloatingDock
           mobileClassName="translate-y-20" // only for demo, remove for production
-          items={links}
+          items={allDockItems}
         />
       </div>
       <StoreDraggableWindow

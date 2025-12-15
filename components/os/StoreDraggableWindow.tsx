@@ -321,7 +321,7 @@ export function StoreDraggableWindow({
   defaultPosition = { x: 0, y: 0 },
   enableMenuRegistry = true,
 }: StoreDraggableWindowProps) {
-  const { createWindow, updateWindow, closeWindow, bringToFront } = useWindowManagement();
+  const { createWindow, updateWindow, closeWindow, bringToFront, addWindowToDock } = useWindowManagement();
   const { getWindowById, windowCount } = useWindowState();
   const [currentOsType, setCurrentOsType] = React.useState<"mac" | "others">(osType);
   const draggableRef = useRef<HTMLDivElement>(null);
@@ -353,9 +353,10 @@ export function StoreDraggableWindow({
     const effectiveWindowId = windowId || createdWindowId;
     if (effectiveWindowId) {
       updateWindow(effectiveWindowId, { state: "minimized" });
+      addWindowToDock(effectiveWindowId);
     }
     onMinimize?.();
-  }, [windowId, createdWindowId, updateWindow, onMinimize]);
+  }, [windowId, createdWindowId, updateWindow, onMinimize, addWindowToDock]);
 
   const handleMaximize = useCallback(() => {
     const effectiveWindowId = windowId || createdWindowId;
@@ -458,8 +459,8 @@ export function StoreDraggableWindow({
     children,
   } as WindowContentProps;
 
-  // If window is closed, only show trigger
-  if (windowState === "closed") {
+  // If window is closed or minimized, only show trigger (like Mac OS)
+  if (windowState === "closed" || windowState === "minimized") {
     if (trigger) {
       // Clone the custom trigger and merge onClick handlers
       return React.cloneElement(trigger as React.ReactElement, {
