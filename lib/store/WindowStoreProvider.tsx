@@ -64,6 +64,27 @@ export function useWindowManagement() {
     store.restoreAllWindows();
   }, [store]);
 
+  // Dock management actions
+  const addWindowToDock = React.useCallback((id: string) => {
+    store.addWindowToDock(id);
+  }, [store]);
+
+  const removeWindowFromDock = React.useCallback((id: string) => {
+    store.removeWindowFromDock(id);
+  }, [store]);
+
+  const restoreWindowFromDock = React.useCallback((id: string) => {
+    store.restoreWindowFromDock(id);
+  }, [store]);
+
+  const closeWindowFromDock = React.useCallback((id: string) => {
+    store.closeWindowFromDock(id);
+  }, [store]);
+
+  const getDockItems = React.useCallback(() => {
+    return store.getDockItems();
+  }, [store]);
+
   return {
     createWindow,
     closeWindow,
@@ -73,6 +94,11 @@ export function useWindowManagement() {
     closeAllWindows,
     minimizeAllWindows,
     restoreAllWindows,
+    addWindowToDock,
+    removeWindowFromDock,
+    restoreWindowFromDock,
+    closeWindowFromDock,
+    getDockItems,
   };
 }
 
@@ -84,6 +110,7 @@ export function useWindowState() {
   const windowCount = store.windowCount;
   const activeWindow = store.getActiveWindow();
   const openWindows = store.getOpenWindows();
+  const minimizedWindows = store.getMinimizedWindows();
   const getWindowById = store.getWindowById;
 
   return {
@@ -91,6 +118,7 @@ export function useWindowState() {
     windowCount,
     activeWindow,
     openWindows,
+    minimizedWindows,
     getWindowById,
   };
 }
@@ -162,5 +190,16 @@ export function useWindowPosition(windowId: string) {
     setSize,
     updatePosition: setPosition,
     updateSize: setSize,
+  };
+}
+
+// Hook for dock items management
+export function useDockItems() {
+  const store = useWindowStoreContext();
+
+  const dockItems = React.useMemo(() => store.getDockItems(), [store]);
+
+  return {
+    dockItems,
   };
 }

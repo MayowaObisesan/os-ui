@@ -16,7 +16,7 @@ export function WindowTracker() {
   }, [windowStats]);
 
   return (
-    <Card className="w-full max-w-md mx-auto mb-4">
+    <Card className="bg-background/25 backdrop-blur-sm w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Window Tracker</CardTitle>
         <CardDescription>Real-time window monitoring and analytics</CardDescription>

@@ -4,24 +4,29 @@ import React, { useState } from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import {
   IconBrandGithub,
-  IconBrandX, IconCalculator,
+  IconBrandX,
+  IconCalculator,
   IconExchange,
   IconHome,
   IconNewSection,
   IconSettings,
   IconTerminal2,
-  IconLockOff, IconLock
+  IconLockOff,
+  IconLock
 } from "@tabler/icons-react";
 import {DockOptions} from "@/components/Dock/DockOptions";
 import {ModeToggle} from "@/components/mode-toggle";
 import { OSWindow } from "@/components/os/Window";
 import { Calculator } from "@/components/os/Calculator";
 import {StoreDraggableWindow} from "@/components/os/StoreDraggableWindow";
+import {useMinimizedWindowDockItems} from "@/components/os/DockWindowManager";
 
 export function OSDock() {
   const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const minimizedWindowDockItems = useMinimizedWindowDockItems();
 
-  const links = [
+  // Static dock items
+  const staticLinks = [
     {
       title: "Home",
       icon: (
@@ -44,18 +49,18 @@ export function OSDock() {
       ),
       href: "#",
     },
-    {
-      title: "Aceternity UI",
-      icon: (
-        <img
-          src="https://assets.aceternity.com/logo-dark.png"
-          width={20}
-          height={20}
-          alt="Aceternity Logo"
-        />
-      ),
-      href: "#",
-    },
+    // {
+    //   title: "Aceternity UI",
+    //   icon: (
+    //     <img
+    //       src="https://assets.aceternity.com/logo-dark.png"
+    //       width={20}
+    //       height={20}
+    //       alt="Aceternity Logo"
+    //     />
+    //   ),
+    //   href: "#",
+    // },
     {
       title: "Changelog",
       icon: (
@@ -63,13 +68,13 @@ export function OSDock() {
       ),
       href: "#",
     },
-    {
-      title: "Calculator",
-      icon: (
-        <IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-      ),
-      onClick: () => setCalculatorOpen(true)
-    },
+    // {
+    //   title: "Calculator",
+    //   icon: (
+    //     <IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+    //   ),
+    //   onClick: () => setCalculatorOpen(true)
+    // },
 
     // {
     //   title: "Twitter",
@@ -114,18 +119,22 @@ export function OSDock() {
       href: "#",
     },
   ];
+
+  // Combine static links with minimized window dock items
+  const allDockItems = [...staticLinks, ...minimizedWindowDockItems];
   return (
     <>
       <div className="flex items-center justify-center w-full">
         <FloatingDock
           mobileClassName="translate-y-20" // only for demo, remove for production
-          items={links}
+          items={allDockItems}
         />
       </div>
       <StoreDraggableWindow
         title="Calculator Window"
         description="A draggable store-managed calculator window"
         type="draggable"
+        icon={<IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
         defaultPosition={{ x: 0, y: 100 }}
         trigger={<div></div>}
         open={calculatorOpen}

@@ -29,6 +29,7 @@ export interface WindowInfo {
   createdAt: Date;
   updatedAt: Date;
   browserData?: BrowserWindowData;
+  icon?: React.ReactNode; // Add icon for dock display
   // Additional window-specific data can be added here
   [key: string]: any;
 }
@@ -38,6 +39,7 @@ interface WindowStoreState {
   windowCount: number;
   activeWindowId?: string;
   nextZIndex: number;
+  dockItems: string[]; // Track window IDs in dock
 }
 
 interface WindowStoreActions {
@@ -51,6 +53,13 @@ interface WindowStoreActions {
   minimizeAllWindows: () => void;
   restoreAllWindows: () => void;
   setActiveWindow: (id?: string) => void;
+
+  // Dock management actions
+  addWindowToDock: (id: string) => void;
+  removeWindowFromDock: (id: string) => void;
+  getDockItems: () => WindowInfo[];
+  restoreWindowFromDock: (id: string) => void;
+  closeWindowFromDock: (id: string) => void;
 
   // Browser-specific actions
   updateBrowserData: (id: string, browserData: Partial<BrowserWindowData>) => void;
@@ -68,6 +77,7 @@ interface WindowStoreActions {
   getActiveWindow: () => WindowInfo | undefined;
   getWindowsByState: (state: WindowState) => WindowInfo[];
   getBrowserWindows: () => WindowInfo[];
+  getMinimizedWindows: () => WindowInfo[];
 }
 
 // Export types for use in other files
@@ -80,6 +90,7 @@ export const useWindowStore = create<WindowStoreState & WindowStoreActions>((set
   windowCount: 0,
   activeWindowId: undefined,
   nextZIndex: 100,
+  dockItems: [],
 
   // Actions
   addWindow: (windowData) => {
@@ -92,8 +103,8 @@ export const useWindowStore = create<WindowStoreState & WindowStoreActions>((set
       zIndex: get().nextZIndex,
       createdAt: now,
       updatedAt: now,
-      title: "",
-      type: ""
+      title: windowData.title || `Window ${get().windowCount + 1}`,
+      type: windowData.type || "basic"
     };
 
     set((state) => ({
@@ -240,6 +251,61 @@ export const useWindowStore = create<WindowStoreState & WindowStoreActions>((set
     set({ activeWindowId: id });
   },
 
+  // Dock management actions
+  addWindowToDock: (id) => {
+    const window = get().windows[id];
+    if (!window) return;
+
+    set((state) => {
+      // Only add to dock if not already there
+      if (state.dockItems.includes(id)) {
+        return state;
+      }
+
+      return {
+        dockItems: [...state.dockItems, id],
+      };
+    });
+  },
+
+  removeWindowFromDock: (id) => {
+    set((state) => ({
+      dockItems: state.dockItems.filter(itemId => itemId !== id),
+    }));
+  },
+
+  getDockItems: () => {
+    const state = get();
+    return state.dockItems
+      .map(id => state.windows[id])
+      .filter(window => window && window.state === "minimized");
+  },
+
+  restoreWindowFromDock: (id) => {
+    const window = get().windows[id];
+    if (!window) return;
+
+    set((state) => {
+      const updatedWindow: WindowInfo = {
+        ...window,
+        state: "open",
+        updatedAt: new Date(),
+      };
+
+      return {
+        windows: {
+          ...state.windows,
+          [id]: updatedWindow,
+        },
+        dockItems: state.dockItems.filter(itemId => itemId !== id),
+      };
+    });
+  },
+
+  closeWindowFromDock: (id) => {
+    get().removeWindow(id);
+  },
+
   // Browser-specific actions
   updateBrowserData: (id, browserData) => {
     set((state) => {
@@ -330,4 +396,6 @@ export const useWindowStore = create<WindowStoreState & WindowStoreActions>((set
     Object.values(get().windows).filter((window) => window.state === state),
   getBrowserWindows: () =>
     Object.values(get().windows).filter((window) => window.type === "browser"),
+  getMinimizedWindows: () =>
+    Object.values(get().windows).filter((window) => window.state === "minimized"),
 }));
