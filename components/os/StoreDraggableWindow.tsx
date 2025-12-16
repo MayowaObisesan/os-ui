@@ -278,24 +278,7 @@ const ContentWrapper = memo(function ContentWrapper({
   );
 });
 
-// Helper function to safely compare React elements without circular reference errors
-function areReactElementsEqual2(a: React.ReactNode, b: React.ReactNode): boolean {
-  // If both are null/undefined
-  if (!a && !b) return true;
-  if (!a || !b) return false;
 
-  // If both are React elements
-  if (React.isValidElement(a) && React.isValidElement(b)) {
-    // Compare type and key props that identify the icon
-    return (
-      a.type === b.type &&
-      a.props.className === b.props.className
-    );
-  }
-
-  // For non-React elements, use Object.is for strict equality
-  return Object.is(a, b);
-}
 
 // Component to handle menu registry context
 function ContentWrapperWithMenu({

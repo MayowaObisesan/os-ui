@@ -103,8 +103,8 @@ export const useWindowStore = create<WindowStoreState & WindowStoreActions>((set
       zIndex: get().nextZIndex,
       createdAt: now,
       updatedAt: now,
-      title: "",
-      type: ""
+      title: windowData.title || `Window ${get().windowCount + 1}`,
+      type: windowData.type || "basic"
     };
 
     set((state) => ({

@@ -49,18 +49,18 @@ export function OSDock() {
       ),
       href: "#",
     },
-    {
-      title: "Aceternity UI",
-      icon: (
-        <img
-          src="https://assets.aceternity.com/logo-dark.png"
-          width={20}
-          height={20}
-          alt="Aceternity Logo"
-        />
-      ),
-      href: "#",
-    },
+    // {
+    //   title: "Aceternity UI",
+    //   icon: (
+    //     <img
+    //       src="https://assets.aceternity.com/logo-dark.png"
+    //       width={20}
+    //       height={20}
+    //       alt="Aceternity Logo"
+    //     />
+    //   ),
+    //   href: "#",
+    // },
     {
       title: "Changelog",
       icon: (
@@ -68,13 +68,13 @@ export function OSDock() {
       ),
       href: "#",
     },
-    {
-      title: "Calculator",
-      icon: (
-        <IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-      ),
-      onClick: () => setCalculatorOpen(true)
-    },
+    // {
+    //   title: "Calculator",
+    //   icon: (
+    //     <IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+    //   ),
+    //   onClick: () => setCalculatorOpen(true)
+    // },
 
     // {
     //   title: "Twitter",

@@ -44,9 +44,11 @@ import LinkInterceptor from "@/components/os/LinkInterceptor";
 import React from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import posthog from "posthog-js";
+import {useWindowAnalytics} from "@/lib/store";
 
 export default function Home() {
   const router = useRouter();
+  const { windowStats } = useWindowAnalytics();
   posthog.capture('home_page', { property: 'click' })
 
   return (
@@ -94,13 +96,13 @@ export default function Home() {
           </Flex>
 
           {/* Profile Card UI */}
-          <Box position={'absolute'} top={'2'} right={'2'}>
-            <Card className={'bg-background/25 backdrop-blur-sm min-w-80 w-full gap-1.5 px-2 py-2'}>
+          <Flex direction={'column'} gap={'2'} position={'absolute'} top={'2'} right={'2'}>
+            <Card className={'bg-background/25 backdrop-blur-sm w-full gap-1.5 px-2 py-2'}>
               <CardHeader className={'flex items-center bg-muted-foreground/15 rounded-lg p-3'}>
                 <Flex align={'center'} gap={'2'} width={'100%'}>
                   <Flex direction={'column'} flexGrow={'1'} gap={'2'}>
                     <CardTitle>
-                      <Text size={'5'}>
+                      <Text size={'4'}>
                         Mayowa Obisesan
                       </Text>
                     </CardTitle>
@@ -112,7 +114,7 @@ export default function Home() {
                       title="My Portfolio"
                       defaultPosition={{ x: 200, y: 200 }}
                       trigger={
-                        <Avatar className={'size-16'}>
+                        <Avatar className={'size-9'}>
                           <AvatarImage src="https://github.com/shadcn.png" />
                           <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
@@ -122,12 +124,17 @@ export default function Home() {
                 </Flex>
               </CardHeader>
               <CardContent className={'px-2'}>
-                <Text color={'gray'} size={'3'}>
+                <Text color={'gray'} size={'2'}>
                   I'm a versatile Software Engineer...
                 </Text>
               </CardContent>
             </Card>
-          </Box>
+            <WindowTracker />
+            <Card className={'bg-background/25 backdrop-blur-sm w-full gap-1.5 px-2 py-2'}>
+              <CardContent>
+              </CardContent>
+            </Card>
+          </Flex>
 
           <Flex direction={'column'} gap={'2'} flexGrow={'0'} p={'2'}>
             <StoreDraggableWindow
