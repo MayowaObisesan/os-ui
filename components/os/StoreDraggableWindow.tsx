@@ -26,6 +26,7 @@ function areReactElementsEqual(a: React.ReactNode, b: React.ReactNode): boolean 
     const bElement = b as React.ReactElement;
 
     // Check if both have props and className
+    // @ts-ignore
     if (aElement.props && bElement.props && 'className' in aElement.props && 'className' in bElement.props) {
       return (
         aElement.type === bElement.type &&
