@@ -20,7 +20,7 @@ import {MenuRegistryDemo} from "@/components/os/MenuRegistryDemo";
 import {TextEditor} from "@/components/os/TextEditor";
 import HomeOld from "@/app/page-old";
 import {NoteEditor} from "@/components/os/DynamicNoteEditor";
-import {Box, Flex, Text} from "@radix-ui/themes";
+import {Box, Flex, Grid, Text} from "@radix-ui/themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Card,
@@ -36,25 +36,49 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
+  ContextMenuSeparator,
 } from "@/components/ui/context-menu"
 import {useRouter} from "next/navigation";
 import BrowserDemo from "@/components/os/BrowserDemo";
 import {BrowserWindow} from "@/components/os/BrowserWindow";
 import LinkInterceptor from "@/components/os/LinkInterceptor";
-import React from "react";
+import React, {ReactNode, useState} from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {Desktop} from "@/components/os/Desktop";
 import posthog from "posthog-js";
 import {useWindowAnalytics} from "@/lib/store";
+import {DesktopIconWithText} from "@/components/DesktopIconWithText";
 
 export default function Home() {
   const router = useRouter();
   const { windowStats } = useWindowAnalytics();
   posthog.capture('home_page', { property: 'click' })
 
+  // State for windows launched from desktop
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const [textEditorOpen, setTextEditorOpen] = useState(false);
+  const [noteEditorOpen, setNoteEditorOpen] = useState(false);
+  const [portfolioOpen, setPortfolioOpen] = useState(false);
+  const [iconsOpen, setIconsOpen] = useState(false);
+
+  const handleLaunch = (app: any) => {
+    switch (app.id) {
+      case "calculator": setCalculatorOpen(true); break;
+      case "text-editor": setTextEditorOpen(true); break;
+      case "note-editor": setNoteEditorOpen(true); break;
+      case "portfolio": setPortfolioOpen(true); break;
+      case "icons": setIconsOpen(true); break;
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div className="min-h-screen">
+        <div className="min-h-screen relative overflow-hidden">
+          {/*<div className="fixed inset-0 z-0 p-6 pointer-events-none bg-blue-700/50">*/}
+          {/*  <div className="relative w-full h-full pointer-events-auto bg-orange-300">*/}
+              <Grid columns={"60px 1fr"} gap={'2'} p={'2'}>
+          {/*<Desktop onLaunch={handleLaunch} />*/}
           {/*<WindowTracker />*/}
           <Flex hidden gap={'2'}>
             <OSWindow
@@ -136,14 +160,16 @@ export default function Home() {
             </Card>
           </Flex>
 
-          <Flex direction={'column'} gap={'2'} flexGrow={'0'} p={'2'}>
+          <Flex className={''} align={'center'} direction={'column'} gap={'4'} flexGrow={'0'}>
             <StoreDraggableWindow
               title="Calculator Window"
               description="A draggable store-managed calculator window"
               icon={<IconCalculator className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               type="draggable"
               defaultPosition={{ x: 0, y: 100 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconCalculator /></Button>}
+              open={calculatorOpen}
+              onOpenChange={setCalculatorOpen}
+              trigger={<DesktopIconWithText icon={<IconCalculator />} name={"Calculator"} />}
             >
               <Calculator />
             </StoreDraggableWindow>
@@ -154,7 +180,9 @@ export default function Home() {
               type="draggable"
               icon={<IconFileTextFilled className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 20, y: 100 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextFilled /></Button>}
+              open={textEditorOpen}
+              onOpenChange={setTextEditorOpen}
+              trigger={<DesktopIconWithText icon={<IconFileTextFilled />} name={"Text Editor"}></DesktopIconWithText>}
             >
               <TextEditor />
             </StoreDraggableWindow>
@@ -165,7 +193,14 @@ export default function Home() {
               type="draggable"
               icon={<IconFileTextSpark className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 20, y: 100 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextSpark /></Button>}
+              open={noteEditorOpen}
+              onOpenChange={setNoteEditorOpen}
+              trigger={
+                <Flex className={'cursor-pointer'} align={'center'} direction={'column'} gap={'1'} justify={'center'} width={'60px'} maxWidth={'80px'}>
+                  <Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextSpark /></Button>
+                  <Text align={'center'} className={''} size={'1'} trim={'normal'}>Note Editor</Text>
+                </Flex>
+              }
             >
               <NoteEditor />
             </StoreDraggableWindow>
@@ -176,7 +211,12 @@ export default function Home() {
               type="draggable"
               icon={<IconGlobe className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 0, y: 0 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconGlobe /></Button>}
+              trigger={
+              <Flex className={'cursor-pointer'} align={'center'} direction={'column'} gap={'1'} justify={'center'} width={'60px'} maxWidth={'80px'}>
+                <Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconGlobe /></Button>
+                <Text align={'center'} className={''} size={'1'} trim={'normal'}>Embedded Page</Text>
+              </Flex>
+              }
             >
               <HomeOld />
             </StoreDraggableWindow>
@@ -187,18 +227,27 @@ export default function Home() {
               title="My Portfolio"
               icon={<IconAppWindow className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 100, y: 100 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconAppWindow /></Button>}
+              open={portfolioOpen}
+              onOpenChange={setPortfolioOpen}
+              trigger={
+                <DesktopIconWithText icon={<IconAppWindow />} name={"My Portfolio"} />
+              }
             />
 
             <BrowserWindow
               initialUrl="https://ai-image-detector-three.vercel.app/"
               title="AFriB Browser"
               defaultPosition={{ x: 100, y: 50 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}>
-                <Text color={'grass'}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M168,128a40,40,0,1,1-40-40A40,40,0,0,1,168,128Z" opacity="0.2"></path><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,16a88,88,0,0,1,73.72,40H128a48.08,48.08,0,0,0-45.6,33l-23.08-40A87.89,87.89,0,0,1,128,40Zm32,88a32,32,0,1,1-32-32A32,32,0,0,1,160,128Zm-45.28,87A88,88,0,0,1,49.56,88.14L86.43,152c.06.1.13.19.19.28A48,48,0,0,0,137.82,175Zm18,.87L169.57,152c.08-.14.14-.28.22-.42a47.88,47.88,0,0,0-6-55.58H210a88,88,0,0,1-77.29,119.87Z"></path></svg>
-                </Text>
-              </Button>}
+              trigger={
+                <DesktopIconWithText
+                  icon={
+                    <Text color={'grass'}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M168,128a40,40,0,1,1-40-40A40,40,0,0,1,168,128Z" opacity="0.2"></path><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,16a88,88,0,0,1,73.72,40H128a48.08,48.08,0,0,0-45.6,33l-23.08-40A87.89,87.89,0,0,1,128,40Zm32,88a32,32,0,1,1-32-32A32,32,0,0,1,160,128Zm-45.28,87A88,88,0,0,1,49.56,88.14L86.43,152c.06.1.13.19.19.28A48,48,0,0,0,137.82,175Zm18,.87L169.57,152c.08-.14.14-.28.22-.42a47.88,47.88,0,0,0-6-55.58H210a88,88,0,0,1-77.29,119.87Z"></path></svg>
+                    </Text>
+                  }
+                  name={"AFriB Browser"}
+                />
+              }
             />
 
             <BrowserWindow
@@ -206,7 +255,15 @@ export default function Home() {
               title="Phosphur icon page"
               icon={<IconIcons className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
               defaultPosition={{ x: 400, y: 50 }}
-              trigger={<Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconIcons /></Button>}
+              open={iconsOpen}
+              onOpenChange={setIconsOpen}
+              trigger={
+                <DesktopIconWithText icon={<IconIcons />} name={"Browser - Phosphur Page"} />
+                /*<Flex className={'cursor-pointer'} align={'center'} direction={'column'} gap={'1'} justify={'center'} width={'60px'} maxWidth={'80px'}>
+                  <Button className={'rounded-2xl'} size={'icon'} variant={'outline'}><IconFileTextSpark /></Button>
+                  <Text align={'center'} className={''} size={'1'} trim={'normal'}>Note Editor</Text>
+                </Flex>*/
+              }
             />
 
             {/*<LinkInterceptor>
@@ -221,13 +278,20 @@ export default function Home() {
           {/*<StoreDemo />*/}
 
           {/*<BrowserDemo />*/}
+              </Grid>
+          {/*  </div>*/}
+          {/*</div>*/}
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem>Profile</ContextMenuItem>
-        <ContextMenuItem>Billing</ContextMenuItem>
+      <ContextMenuContent className="w-64">
+        <ContextMenuItem>New Folder</ContextMenuItem>
+        <ContextMenuItem>New File</ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem onClick={() => router.refresh()}>Refresh</ContextMenuItem>
-        <ContextMenuItem>Subscription</ContextMenuItem>
+        <ContextMenuItem>Change Wallpaper</ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem>Display Settings</ContextMenuItem>
+        <ContextMenuItem>Personalize</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
