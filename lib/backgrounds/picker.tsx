@@ -51,7 +51,7 @@ export function BackgroundPicker({ open, onOpenChange }: BackgroundPickerProps) 
   } = useBackground();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<BackgroundCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<BackgroundCategory | 'all' | 'recent' | 'favorites'>('all');
   const [searchResults, setSearchResults] = useState<Background[]>([]);
   const [curatedPhotos, setCuratedPhotos] = useState<Background[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -98,7 +98,7 @@ export function BackgroundPicker({ open, onOpenChange }: BackgroundPickerProps) 
     }
   };
 
-  const handleCategorySelect = async (category: BackgroundCategory | 'all') => {
+  const handleCategorySelect = async (category: BackgroundCategory | 'all' | 'recent' | 'favorites') => {
     setSelectedCategory(category);
 
     if (category === 'all') {
@@ -205,7 +205,7 @@ export function BackgroundPicker({ open, onOpenChange }: BackgroundPickerProps) 
             </div>
 
             {/* Category Tabs */}
-            <Tabs value={selectedCategory} onValueChange={handleCategorySelect}>
+            <Tabs value={selectedCategory} onValueChange={(value) => handleCategorySelect(value as BackgroundCategory | 'all' | 'recent' | 'favorites')}>
               <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
                 {categories.map((category) => (
                   <TabsTrigger key={category.id} value={category.id} className="text-xs">
