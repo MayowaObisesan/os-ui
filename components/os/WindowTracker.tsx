@@ -19,38 +19,38 @@ export function WindowTracker() {
     <Card className="bg-background/25 backdrop-blur-sm w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Window Tracker</CardTitle>
-        <CardDescription>Real-time window monitoring and analytics</CardDescription>
+        <CardDescription className={'text-secondary-foreground'}>Real-time window monitoring and analytics</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Total Windows</span>
+              <span className="text-sm text-secondary-foreground">Total Windows</span>
               <span className="text-2xl font-bold">{windowStats.totalWindows}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Open Windows</span>
+              <span className="text-sm text-secondary-foreground">Open Windows</span>
               <span className="text-2xl font-bold">{windowStats.openCount}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Minimized</span>
+              <span className="text-sm text-secondary-foreground">Minimized</span>
               <span className="text-2xl font-bold">{windowStats.minimizedCount}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Maximized</span>
+              <span className="text-sm text-secondary-foreground">Maximized</span>
               <span className="text-2xl font-bold">{windowStats.maximizedCount}</span>
             </div>
           </div>
 
           <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex flex-col justify-between items-start mb-2">
               <span className="text-sm font-medium">Active Window</span>
               {activeWindow ? (
-                <span className="text-sm text-muted-foreground">
+                <span className="font-semibold text-sm text-secondary-foreground">
                   {activeWindow.title} ({activeWindow.type})
                 </span>
               ) : (
-                <span className="text-sm text-muted-foreground">None</span>
+                <span className="font-semibold text-sm text-secondary-foreground">None</span>
               )}
             </div>
 
@@ -89,7 +89,7 @@ export function WindowTracker() {
                       ))}
                     </ul>
                   ) : (
-                    <div className="ml-4 text-muted-foreground">No open windows</div>
+                    <div className="ml-4 text-secondary-foreground">No open windows</div>
                   )}
                 </div>
               </div>
