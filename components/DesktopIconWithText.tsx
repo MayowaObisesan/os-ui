@@ -13,19 +13,19 @@ interface DesktopIconWithTextProps {
 export function DesktopIconWithText({ icon, name, onClick }: DesktopIconWithTextProps) {
   return (
     <Flex
-      className={'cursor-pointer'}
+      className={'cursor-pointer bg-background/25 backdrop-blur-sm px-3 py-4 rounded-2xl'}
       align={'center'}
       direction={'column'}
-      gap={'1'}
+      gap={'2'}
       justify={'center'}
-      width={'60px'}
-      maxWidth={'80px'}
+      width={'92px'}
+      maxWidth={'92px'}
       onClick={onClick} // Forward the onClick prop to Flex
     >
-      <Button className={'rounded-2xl'} size={'icon'} variant={'outline'}>
-        {icon}
-      </Button>
-      <Text align={'center'} className={'line-clamp-3'} size={'1'} trim={'normal'}>
+      {/*<Button className={'rounded-xl'} size={'icon-lg'} variant={'default'}>*/}
+      {/*</Button>*/}
+      <Flex align={'center'} className={'size-10'} justify={'center'}>{icon}</Flex>
+      <Text align={'center'} className={'line-clamp-3'} size={'2'} trim={'normal'} weight={'medium'}>
         {name}
       </Text>
     </Flex>
