@@ -169,7 +169,18 @@ export default function Home() {
               </Card>
               <Card className={'bg-background/25 backdrop-blur-sm w-full gap-1.5 px-2 py-2 shadow-none'}>
                 <CardContent className={'cursor-pointer text-center'} onClick={() => setPortfolioOpen(true)}>
-                  View my Portfolio
+                  <BrowserWindow
+                    windowId={'my-porfolio-window'}
+                    initialUrl="https://my-portfolio-rho-two-89.vercel.app/"
+                    title="My Portfolio"
+                    // icon={<IconAppWindow className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
+                    defaultPosition={{ x: 100, y: 100 }}
+                    // open={portfolioOpen}
+                    // onOpenChange={setPortfolioOpen}
+                    trigger={
+                      <Text>View my Portfolio</Text>
+                    }
+                  />
                 </CardContent>
               </Card>
               <WindowTracker />
@@ -238,14 +249,18 @@ export default function Home() {
                 <HomeOld />
               </StoreDraggableWindow>
 
+              {/*
+              TODO: When I use the open or onOpenChange, urls do not render as expected.
+               It keeps loading the url, but never displays until the url is modified from the browser window url.
+              */}
               <BrowserWindow
                 windowId={'my-porfolio-window'}
-                initialUrl="https://my-portfolio-rho-two-89.vercel.app"
+                initialUrl="https://my-portfolio-rho-two-89.vercel.app/"
                 title="My Portfolio"
                 icon={<IconAppWindow className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
                 defaultPosition={{ x: 100, y: 100 }}
-                open={portfolioOpen}
-                onOpenChange={setPortfolioOpen}
+                // open={portfolioOpen}
+                // onOpenChange={setPortfolioOpen}
                 trigger={
                   <DesktopIconWithText icon={<Image alt={'my portfolio'} className={'rounded-full'} src={'/my_profile_dp.jpeg'} width={40} height={40} />} name={"My Portfolio"} />
                 }
