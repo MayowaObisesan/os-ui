@@ -240,7 +240,7 @@ export default function Home() {
 
               <BrowserWindow
                 windowId={'my-porfolio-window'}
-                initialUrl="https://my-portfolio-rho-two-89.vercel.app/"
+                initialUrl="https://my-portfolio-rho-two-89.vercel.app"
                 title="My Portfolio"
                 icon={<IconAppWindow className="h-full w-full text-neutral-500 dark:text-neutral-300" />}
                 defaultPosition={{ x: 100, y: 100 }}
